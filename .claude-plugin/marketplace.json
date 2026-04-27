@@ -1,0 +1,20 @@
+{
+  "name": "saroby-marketplace",
+  "owner": {
+    "name": "saroby"
+  },
+  "metadata": {
+    "description": "saroby's Claude Code plugins"
+  },
+  "plugins": [
+    {
+      "name": "codex-util",
+      "description": "Use Codex AI features inside Claude Code via the ChatGPT subscription path (no Platform API key, no Node CLI fork per call)",
+      "version": "0.1.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/codex-util.git"
+      }
+    }
+  ]
+}
