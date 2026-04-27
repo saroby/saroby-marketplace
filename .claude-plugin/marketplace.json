@@ -15,6 +15,15 @@
         "source": "url",
         "url": "https://github.com/saroby/codex-util.git"
       }
+    },
+    {
+      "name": "nanobanana-mcp",
+      "description": "Google Gemini image generation MCP server (Nano Banana) — flash and pro modes",
+      "version": "1.0.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/nanobanana-mcp.git"
+      }
     }
   ]
 }

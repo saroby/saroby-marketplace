@@ -19,3 +19,4 @@ Then install individual plugins:
 | Plugin | Description | Source |
 |---|---|---|
 | `codex-util` | Use Codex AI features via the ChatGPT subscription path (no Platform API key) | [saroby/codex-util](https://github.com/saroby/codex-util) |
+| `nanobanana-mcp` | Google Gemini image generation MCP server (Nano Banana) — flash and pro modes | [saroby/nanobanana-mcp](https://github.com/saroby/nanobanana-mcp) |
