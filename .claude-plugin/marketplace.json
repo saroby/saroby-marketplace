@@ -47,6 +47,15 @@
         "source": "url",
         "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git"
       }
+    },
+    {
+      "name": "axiom",
+      "description": "Battle-tested Claude Code agents, skills, and references for modern xOS (iOS, iPadOS, macOS, watchOS, tvOS) development",
+      "source": {
+        "source": "github",
+        "repo": "CharlesWiltgen/Axiom",
+        "path": ".claude-plugin/plugins/axiom"
+      }
     }
   ]
 }
