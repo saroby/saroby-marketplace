@@ -10,7 +10,6 @@
     {
       "name": "codex-util",
       "description": "Use Codex AI features inside Claude Code via the ChatGPT subscription path (no Platform API key, no Node CLI fork per call)",
-      "version": "0.1.0",
       "source": {
         "source": "url",
         "url": "https://github.com/saroby/codex-util.git"
@@ -19,7 +18,6 @@
     {
       "name": "nanobanana-mcp",
       "description": "Google Gemini image generation MCP server (Nano Banana) — flash and pro modes",
-      "version": "1.0.0",
       "source": {
         "source": "url",
         "url": "https://github.com/saroby/nanobanana-mcp.git"
@@ -28,7 +26,6 @@
     {
       "name": "autobot",
       "description": "App idea to TestFlight in one command. Enterprise-grade iOS 26+ app builder with parallel agent orchestration and self-improving build process.",
-      "version": "0.2.0",
       "source": {
         "source": "github",
         "repo": "saroby/Autobot",
@@ -38,10 +35,17 @@
     {
       "name": "andrej-karpathy-skills",
       "description": "Behavioral guidelines to reduce common LLM coding mistakes, derived from Andrej Karpathy's observations on LLM coding pitfalls",
-      "version": "1.0.0",
       "source": {
         "source": "url",
         "url": "https://github.com/forrestchang/andrej-karpathy-skills.git"
+      }
+    },
+    {
+      "name": "ui-ux-pro-max",
+      "description": "Professional UI/UX design intelligence for AI coding assistants. Includes searchable databases of styles, colors, typography, charts, and UX guidelines for React, Next.js, Astro, Vue, Nuxt.js, Nuxt UI, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, and Jetpack Compose.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git"
       }
     }
   ]
