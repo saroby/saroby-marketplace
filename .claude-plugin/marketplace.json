@@ -56,6 +56,14 @@
         "repo": "CharlesWiltgen/Axiom",
         "path": ".claude-plugin/plugins/axiom"
       }
+    },
+    {
+      "name": "app-store-screenshots",
+      "description": "End-to-end App Store and Google Play screenshot generator — scaffolds a Next.js project that renders advertisement-style screenshots for iPhone, iPad, Android phone/tablet, and Feature Graphic, then exports PNGs at all required Apple and Google resolutions.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/app-store-screenshots.git"
+      }
     }
   ]
 }
