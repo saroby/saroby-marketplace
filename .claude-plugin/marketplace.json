@@ -27,9 +27,8 @@
       "name": "autobot",
       "description": "App idea to TestFlight in one command. Enterprise-grade iOS 26+ app builder with parallel agent orchestration and self-improving build process.",
       "source": {
-        "source": "github",
-        "repo": "saroby/Autobot",
-        "path": "plugins/autobot"
+        "source": "url",
+        "url": "https://github.com/saroby/Autobot.git"
       }
     },
     {
@@ -52,9 +51,8 @@
       "name": "axiom",
       "description": "Battle-tested Claude Code agents, skills, and references for modern xOS (iOS, iPadOS, macOS, watchOS, tvOS) development",
       "source": {
-        "source": "github",
-        "repo": "CharlesWiltgen/Axiom",
-        "path": ".claude-plugin/plugins/axiom"
+        "source": "url",
+        "url": "https://github.com/CharlesWiltgen/Axiom/.claude-plugin/plugins/axiom"
       }
     },
     {
