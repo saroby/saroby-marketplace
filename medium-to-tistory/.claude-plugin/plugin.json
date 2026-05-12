@@ -1,0 +1,10 @@
+{
+  "name": "medium-to-tistory",
+  "version": "0.1.0",
+  "description": "Download a Medium article for topic inspiration, write a substantially original Korean post on the same topic with a fresh hero image, and publish privately to Tistory in HTML mode. Glue layer between medium-cli and tistory-cli with IP-safe guardrails (no translation, no source images).",
+  "author": {
+    "name": "saroby"
+  },
+  "license": "MIT",
+  "keywords": ["medium", "tistory", "blog", "korean", "publishing", "automation"]
+}
