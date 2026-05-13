@@ -1,0 +1,4711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>FilmMaker</title>
+<style>
+  :root {
+    --primary: #0066cc;
+    --primary-focus: #0071e3;
+    --primary-on-dark: #2997ff;
+
+    --ink: #1d1d1f;
+    --ink-80: #333333;
+    --ink-48: #7a7a7a;
+    --body-muted: #cccccc;
+    --hairline: #e0e0e0;
+    --divider-soft: #f0f0f0;
+
+    --canvas: #ffffff;
+    --canvas-parchment: #f5f5f7;
+    --surface-pearl: #fafafc;
+    --tile-1: #272729;
+    --tile-2: #2a2a2c;
+    --tile-3: #252527;
+    --black: #000000;
+    --chip-trans: rgba(210, 210, 215, 0.64);
+
+    --shadow-product: rgba(0, 0, 0, 0.22) 0 5px 30px;
+
+    --r-none: 0;
+    --r-xs: 5px;
+    --r-sm: 8px;
+    --r-md: 11px;
+    --r-lg: 18px;
+    --r-pill: 9999px;
+
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 17px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 80px;
+
+    --font-display: 'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    --font-text: 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--canvas-parchment);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font-family: inherit; color: inherit; background: none; border: none; outline: none; }
+  a { text-decoration: none; color: inherit; }
+
+  /* ============ APP CHROME ============ */
+  .app { display: flex; flex-direction: column; height: 100%; }
+
+  /* Global nav — Apple's slim black bar */
+  .global-nav {
+    background: var(--black);
+    color: var(--canvas);
+    height: 44px;
+    padding: 0 var(--s-lg);
+    display: flex; align-items: center; gap: var(--s-md);
+    font-family: var(--font-text);
+    font-size: 12px;
+    letter-spacing: -0.12px;
+    flex-shrink: 0;
+  }
+  .global-nav .brand {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.374px;
+  }
+  .global-nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-lg); }
+  .global-nav-links a { opacity: 0.88; cursor: pointer; transition: opacity 0.15s; padding: 0 var(--s-xs); }
+  .global-nav-links a:hover { opacity: 1; }
+  .global-nav-links a.active { opacity: 1; color: var(--canvas); }
+  .global-nav .right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+  .av-stack { display: flex; }
+  .av {
+    width: 26px; height: 26px;
+    border-radius: var(--r-pill);
+    border: 2px solid var(--black);
+    font-size: 11px; font-weight: 600; color: var(--canvas);
+    display: flex; align-items: center; justify-content: center;
+    margin-left: -6px;
+    font-family: var(--font-text);
+  }
+  .av.director { background: var(--primary); }
+  .av-pink { background: #c66; } .av-violet { background: #a6c; } .av-blue { background: #69c; }
+
+  /* Presence cluster on card items (smaller, overlaid on cover) */
+  .item-presence {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    display: flex;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .item-presence .av-mini {
+    width: 22px; height: 22px;
+    border-radius: var(--r-pill);
+    border: 2px solid var(--canvas);
+    font-family: var(--font-text);
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin-left: -6px;
+    letter-spacing: -0.12px;
+  }
+  .item-presence .av-mini:first-child { margin-left: 0; }
+  .item-presence .av-mini.director { background: var(--primary); color: var(--canvas); }
+  .item-presence .av-mini.pink { background: #c66; }
+  .item-presence .av-mini.violet { background: #a6c; }
+  .item-presence .av-mini.blue { background: #69c; }
+  .item-presence .av-mini.amber { background: #d4b56a; color: var(--ink); }
+
+  /* Sub-nav frosted */
+  .sub-nav {
+    background: rgba(245, 245, 247, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    color: var(--ink);
+    height: 52px;
+    padding: 0 var(--s-lg);
+    display: flex; align-items: center; gap: var(--s-md);
+    border-bottom: 1px solid var(--divider-soft);
+    flex-shrink: 0;
+  }
+  .sub-nav .category {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.19;
+    letter-spacing: 0.231px;
+  }
+  .sub-nav .links { display: flex; gap: var(--s-md); margin-left: auto; }
+  .sub-nav .links a {
+    font-family: var(--font-text);
+    font-size: 14px;
+    letter-spacing: -0.224px;
+    color: var(--ink-80);
+    cursor: pointer;
+    transition: color 0.15s;
+    position: relative;
+    padding: 4px 2px;
+  }
+  .sub-nav .links a:hover { color: var(--primary); }
+  .sub-nav .links a.active { color: var(--primary); font-weight: 600; }
+  .sub-nav .links a.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -18px;
+    height: 2px;
+    background: var(--primary);
+  }
+  .sub-nav .primary-cta {
+    background: var(--primary);
+    color: var(--canvas);
+    padding: 7px 17px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: -0.224px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .sub-nav .primary-cta:active { transform: scale(0.95); }
+
+  /* Scene context — Level 3 nav appears when in a scene stage */
+  .scene-context {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--divider-soft);
+    height: 48px;
+    padding: 0 var(--s-lg);
+    display: none;
+    align-items: center;
+    gap: var(--s-lg);
+    flex-shrink: 0;
+  }
+  .scene-context.show { display: flex; }
+  .sc-crumb { display: flex; align-items: center; gap: var(--s-xs); }
+  .sc-crumb a {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    cursor: pointer;
+    letter-spacing: -0.224px;
+    transition: color 0.15s;
+  }
+  .sc-crumb a:hover { color: var(--primary); }
+  .sc-sep { color: var(--ink-48); font-size: 14px; }
+  .sc-cur {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+  }
+  .sc-stages { margin-left: auto; display: flex; gap: var(--s-md); }
+  .sc-stages a {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    cursor: pointer;
+    padding: 4px 2px;
+    position: relative;
+    transition: color 0.15s;
+  }
+  .sc-stages a:hover { color: var(--primary); }
+  .sc-stages a.active { color: var(--primary); font-weight: 600; }
+  .sc-stages a.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -14px;
+    height: 2px;
+    background: var(--primary);
+  }
+
+  .stage { flex: 1; position: relative; overflow: hidden; }
+
+  /* ============ SHARED ELEMENTS ============ */
+  .pill-link {
+    color: var(--primary);
+    font-family: var(--font-text);
+    font-size: 17px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .pill-link::after { content: " ›"; }
+  .pill-link:hover { opacity: 0.75; }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--canvas);
+    font-family: var(--font-text);
+    font-size: 17px;
+    padding: 11px 22px;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:active { transform: scale(0.95); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    font-family: var(--font-text);
+    font-size: 17px;
+    padding: 10px 22px;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(0, 102, 204, 0.04); }
+  .btn-ghost:active { transform: scale(0.95); }
+
+  .btn-dark-utility {
+    background: var(--ink);
+    color: var(--canvas);
+    font-family: var(--font-text);
+    font-size: 14px;
+    letter-spacing: -0.224px;
+    padding: 8px 15px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .btn-dark-utility:active { transform: scale(0.95); }
+
+  /* ============ SCREENS ============ */
+  .screen { display: none; height: 100%; position: relative; overflow: auto; }
+  .screen.active { display: block; }
+
+  /* ============ PROJECTS (home) ============ */
+  .projects-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--s-xxl) var(--s-xl) var(--s-section);
+  }
+  .projects-greeting {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-xs);
+  }
+  .projects-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: 0;
+    margin-bottom: var(--s-xl);
+  }
+
+  .projects-search {
+    background: var(--canvas);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--r-pill);
+    padding: 12px 20px;
+    height: 44px;
+    display: flex; align-items: center; gap: var(--s-sm);
+    max-width: 560px;
+    margin-bottom: var(--s-xl);
+    transition: border-color 0.15s;
+  }
+  .projects-search:focus-within { border-color: var(--primary); }
+  .projects-search input {
+    flex: 1;
+    font-family: var(--font-text);
+    font-size: 17px;
+    letter-spacing: -0.374px;
+    color: var(--ink);
+  }
+  .projects-search input::placeholder { color: var(--ink-48); }
+  .projects-search .leading {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-lg);
+    margin-bottom: var(--s-xl);
+  }
+  .project-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+    transition: transform 0.15s, border-color 0.15s;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .project-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .proj-clickable { cursor: pointer; display: flex; flex-direction: column; gap: var(--s-xs); flex: 1; }
+  .project-card.starred { border-color: var(--primary); }
+  .project-card.new-project { border-style: dashed; background: transparent; }
+  .project-card.new-project:hover { border-color: var(--primary); }
+  .project-cover {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #2a3340, #3a2d2d);
+    border-radius: var(--r-sm);
+    margin-bottom: var(--s-md);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .project-cover.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .star-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--hairline);
+    color: var(--ink-48);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.1s, color 0.15s, background 0.15s;
+    z-index: 2;
+  }
+  .star-btn:hover { transform: scale(1.08); color: var(--primary); }
+  .star-btn:active { transform: scale(0.92); }
+  .project-card.starred .star-btn { color: var(--primary); background: rgba(0, 102, 204, 0.08); border-color: var(--primary); }
+  .project-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: var(--s-xs);
+  }
+  .project-name {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.19;
+    letter-spacing: 0.231px;
+    margin-bottom: var(--s-xs);
+  }
+  .project-stats { display: flex; gap: var(--s-lg); margin-top: var(--s-sm); }
+  .project-stat .num {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .project-stat .num.alert { color: var(--ink); }
+  .project-stat .label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+  }
+  .project-bar {
+    height: 4px;
+    background: var(--divider-soft);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    margin-top: var(--s-md);
+  }
+  .project-bar .fill { height: 100%; background: var(--primary); border-radius: var(--r-pill); }
+
+  .project-card.new-card {
+    border: 1px dashed var(--hairline);
+    background: transparent;
+    align-items: center; justify-content: center;
+    text-align: center;
+    gap: var(--s-xs);
+  }
+  .new-card .plus {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--ink-48);
+    line-height: 1;
+  }
+  .new-card .name {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+
+  .quick-actions {
+    display: flex; gap: var(--s-sm); align-items: center; flex-wrap: wrap;
+    padding-top: var(--s-lg);
+    border-top: 1px solid var(--divider-soft);
+  }
+  .quick-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-right: var(--s-sm);
+  }
+
+  /* ============ DASHBOARD ============ */
+  .dash {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--s-xxl) var(--s-xl) var(--s-section);
+  }
+  .dash-header { margin-bottom: var(--s-xl); }
+  .dash-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: var(--s-xs);
+  }
+  .dash-lede {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink-80);
+  }
+
+  .dash-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: var(--s-lg);
+    margin-bottom: var(--s-xl);
+  }
+  .summary-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .summary-card .num {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--primary);
+  }
+  .summary-card .num.alert { color: var(--ink); }
+  .summary-card .label {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    margin-top: var(--s-xs);
+  }
+  .summary-card .sub {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-80);
+    margin-top: var(--s-sm);
+    letter-spacing: -0.224px;
+  }
+
+  .dash-split { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s-lg); }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+    margin-bottom: var(--s-md);
+  }
+
+  .activity-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+  .activity-item {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md) var(--s-lg);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .activity-item:hover { border-color: var(--ink-48); }
+  .activity-when {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: var(--s-xxs);
+  }
+  .activity-text {
+    font-family: var(--font-text);
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+  }
+  .activity-text strong { font-weight: 600; }
+  .activity-text .pill-link { font-size: 14px; }
+
+  .pending-list { display: flex; flex-direction: column; gap: var(--s-sm); }
+  .pending-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    cursor: pointer;
+    display: flex; gap: var(--s-md); align-items: center;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .pending-card:hover { border-color: var(--ink-48); transform: translateY(-1px); }
+  .pending-thumb {
+    width: 96px; height: 54px;
+    background: linear-gradient(135deg, #2a3340, #3a2d2d);
+    border-radius: var(--r-sm);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-product);
+  }
+  .pending-info { flex: 1; }
+  .pending-where {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: 2px;
+  }
+  .pending-title {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.24;
+    letter-spacing: -0.374px;
+    margin-bottom: 4px;
+  }
+  .pending-meta {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+
+  .episodes-grid {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .ep-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 70px;
+    gap: var(--s-md);
+    align-items: center;
+    padding: var(--s-sm) 0;
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .ep-row:last-child { border-bottom: 0; }
+  .ep-name {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.224px;
+    color: var(--ink-80);
+  }
+  .ep-name.cur { color: var(--primary); }
+  .ep-strip { display: flex; gap: 4px; flex-wrap: wrap; }
+  .ep-cell {
+    width: 24px; height: 16px;
+    border-radius: var(--r-xs);
+    background: var(--divider-soft);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .ep-cell:hover { transform: scale(1.1); }
+  .ep-cell.done { background: var(--primary); }
+  .ep-cell.cur { background: var(--primary); outline: 2px solid var(--primary-focus); outline-offset: 1px; }
+  .ep-cell.pending { background: rgba(0, 102, 204, 0.3); }
+  .ep-cell.empty { background: var(--divider-soft); cursor: default; }
+  .ep-cell.empty:hover { transform: none; }
+  .ep-prog {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    text-align: right;
+    letter-spacing: -0.224px;
+  }
+  .ep-prog.done { color: var(--primary); }
+
+  /* ============ PROMPT MODAL (character creation prompt) ============ */
+  .prompt-modal {
+    position: fixed; inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    z-index: 110;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s-xl);
+    animation: pm-fadein 0.18s ease-out;
+  }
+  .prompt-modal.open { display: flex; }
+  @keyframes pm-fadein { from { opacity: 0; } to { opacity: 1; } }
+  .pm-card {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    max-width: 560px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: var(--s-xl);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+    animation: pm-pop 0.22s cubic-bezier(.2, 1.2, .4, 1);
+  }
+  @keyframes pm-pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .pm-head { display: flex; align-items: center; gap: var(--s-md); margin-bottom: var(--s-lg); }
+  .pm-head h3 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+  }
+  .pm-close {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--ink-48);
+    padding: 6px 12px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-text);
+    font-size: 14px;
+  }
+  .pm-close:hover { background: var(--divider-soft); color: var(--ink); }
+  .pm-character { display: flex; gap: var(--s-md); align-items: center; margin-bottom: var(--s-lg); padding-bottom: var(--s-lg); border-bottom: 1px solid var(--divider-soft); }
+  .pm-portrait {
+    width: 72px;
+    aspect-ratio: 3/4;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    flex-shrink: 0;
+  }
+  .pm-info .pm-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.14;
+    margin-bottom: var(--s-xxs);
+  }
+  .pm-info .pm-name .mention { color: var(--primary); }
+  .pm-info .pm-meta {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+  .pm-section-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    text-transform: uppercase;
+    margin-bottom: var(--s-xs);
+  }
+  .pm-prompt {
+    background: var(--canvas-parchment);
+    border-radius: var(--r-sm);
+    padding: var(--s-md) var(--s-lg);
+    font-family: var(--font-text);
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.55;
+    letter-spacing: -0.374px;
+    margin-bottom: var(--s-lg);
+  }
+  .pm-tech {
+    display: flex;
+    gap: var(--s-lg);
+    margin-bottom: var(--s-xl);
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+  .pm-tech .label { display: block; font-size: 11px; margin-bottom: 2px; }
+  .pm-tech .val { color: var(--ink); font-weight: 600; }
+  .pm-actions { display: flex; gap: var(--s-sm); justify-content: flex-end; }
+
+  /* ============ REFERENCES (참고자료) ============ */
+  .ref-list { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .ref-row {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md) var(--s-lg);
+    display: flex; align-items: center; gap: var(--s-md);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .ref-row:hover { border-color: var(--ink-48); transform: translateY(-1px); }
+  .ref-row.new-ref { border-style: dashed; background: transparent; }
+  .ref-row.new-ref:hover { border-color: var(--primary); }
+  .ref-icon {
+    width: 48px; height: 48px;
+    border-radius: var(--r-sm);
+    background: var(--canvas-parchment);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .ref-icon.empty {
+    background: transparent;
+    border: 1px dashed var(--hairline);
+    color: var(--ink-48);
+    font-size: 24px;
+    font-weight: 300;
+  }
+  .ref-info { flex: 1; min-width: 0; }
+  .ref-title {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    margin-bottom: 2px;
+  }
+  .ref-meta {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+  .ref-stage {
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.12px;
+    flex-shrink: 0;
+  }
+  .ref-stage.chip-success { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+  .ref-stage.chip-warn { background: rgba(212, 181, 106, 0.18); color: #946d20; }
+  .ref-stage.chip-default { background: var(--divider-soft); color: var(--ink-48); }
+  .ref-updated {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    flex-shrink: 0;
+  }
+  .ref-action {
+    font-size: 13px !important;
+    padding: 7px 14px !important;
+    flex-shrink: 0;
+  }
+
+  .moodboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--s-lg);
+  }
+  .mood-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .mood-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .mood-card.new-mood { border-style: dashed; background: transparent; }
+  .mood-card.new-mood:hover { border-color: var(--primary); }
+  .mood-cover {
+    aspect-ratio: 16/9;
+    box-shadow: var(--shadow-product);
+  }
+  .mood-cover.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 32px;
+    font-weight: 300;
+  }
+  .mood-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .mood-title {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+  }
+  .mood-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+
+  /* ============ ASSET SUB-TABS (캐릭터 / 배경 / 소품) ============ */
+  .asset-tabs {
+    display: flex;
+    gap: var(--s-md);
+    border-bottom: 1px solid var(--divider-soft);
+    margin-bottom: var(--s-xl);
+    padding: 0;
+  }
+  .asset-tab {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink-48);
+    cursor: pointer;
+    padding: var(--s-sm) var(--s-xs);
+    position: relative;
+    letter-spacing: -0.374px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .asset-tab:hover { color: var(--ink-80); }
+  .asset-tab.active { color: var(--primary); }
+  .asset-tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: var(--primary);
+  }
+  .asset-tab .count-pill {
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-48);
+    background: var(--divider-soft);
+    padding: 2px 9px;
+    border-radius: var(--r-pill);
+    letter-spacing: -0.12px;
+  }
+  .asset-tab.active .count-pill { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+
+  .asset-pane { display: none; }
+  .asset-pane.active { display: block; }
+
+  /* Background grid — 16:9 covers (wider aspect than character 3:4) */
+  .bg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--s-lg);
+  }
+  .bg-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .bg-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .bg-thumb {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #2a3340, #1a3548);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .bg-thumb.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .bg-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .bg-name {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.374px;
+  }
+  .bg-name .mention { color: var(--primary); }
+  .bg-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+
+  /* Props grid — square 1:1 covers */
+  .props-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--s-lg);
+  }
+  .prop-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .prop-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .prop-thumb {
+    aspect-ratio: 1/1;
+    background: linear-gradient(135deg, #3a3320, #2a2d20);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .prop-thumb.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .prop-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .prop-name {
+    font-family: var(--font-text);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.374px;
+  }
+  .prop-name .mention { color: var(--primary); }
+  .prop-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+
+  /* ============ CHARACTER LIST ============ */
+  .characters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--s-lg);
+  }
+  .character-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .character-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .character-portrait {
+    aspect-ratio: 3/4;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .character-card.new-character { border-style: dashed; background: transparent; }
+  .character-card.new-character:hover { border-color: var(--primary); }
+  .character-portrait.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 32px;
+    font-weight: 300;
+  }
+  .character-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .character-name {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.374px;
+  }
+  .character-name .mention { color: var(--primary); }
+  .character-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+
+  /* Back link */
+  .back-link {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--primary);
+    cursor: pointer;
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-sm);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .back-link::before { content: "‹"; font-size: 16px; }
+
+  /* ============ SCRIPT → CUTS (annotation) ============ */
+  .sc-cuts-header {
+    display: flex; flex-direction: column; gap: var(--s-sm);
+    padding-bottom: var(--s-lg);
+    border-bottom: 1px solid var(--divider-soft);
+    margin-bottom: var(--s-lg);
+  }
+  .sc-cuts-title-row { display: flex; align-items: baseline; gap: var(--s-md); }
+  .sc-cuts-actions { display: flex; align-items: center; gap: var(--s-md); }
+  .sc-cuts-count {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    margin-right: auto;
+  }
+  .sc-cuts-count strong { color: var(--primary); font-weight: 600; }
+
+  .annotation-pane {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .ann-row {
+    display: grid;
+    grid-template-columns: 38% 1fr;
+    gap: var(--s-xl);
+    padding: var(--s-md) 0;
+    border-bottom: 1px solid var(--divider-soft);
+    align-items: start;
+  }
+  .ann-row:last-child { border-bottom: 0; }
+  .ann-row:hover .ann-script { color: var(--primary); }
+  .ann-row.heading-row { padding-top: var(--s-lg); }
+  .ann-script {
+    font-family: var(--font-text);
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    transition: color 0.12s;
+  }
+  .ann-script.heading {
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-48);
+    font-weight: 600;
+  }
+  .ann-script.action { color: var(--ink); }
+  .ann-script.character {
+    text-align: center;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 14px;
+    padding-top: var(--s-xs);
+  }
+  .ann-script.paren {
+    text-align: center;
+    color: var(--ink-48);
+    font-size: 14px;
+    font-style: italic;
+  }
+  .ann-script.dialogue {
+    font-weight: 500;
+    padding-left: var(--s-xl);
+    color: var(--ink);
+  }
+
+  .ann-cuts {
+    display: flex; gap: var(--s-md);
+    flex-wrap: wrap;
+  }
+  .cut-suggest {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    width: 240px;
+    transition: border-color 0.15s;
+  }
+  .cut-suggest:hover { border-color: var(--ink-48); }
+  .cut-suggest.accepted { border-color: var(--primary); }
+  .cs-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .cs-body { padding: var(--s-sm) var(--s-md) var(--s-sm); }
+  .cs-meta {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-xs);
+    line-height: 1.43;
+  }
+  .cs-actions {
+    display: flex; gap: 4px;
+  }
+  .cs-act {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    background: var(--canvas-parchment);
+    border: 1px solid transparent;
+    color: var(--ink-80);
+    font-family: var(--font-text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+  .cs-act:hover { background: var(--divider-soft); }
+  .cs-act.primary {
+    background: var(--primary);
+    color: var(--canvas);
+    flex: 2;
+  }
+  .cs-act.primary:hover { background: var(--primary-focus); }
+  .cut-suggest.accepted .cs-act.primary { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
+
+  /* ============ EPISODE DETAIL — scenes grid ============ */
+  .scenes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--s-lg);
+  }
+  .scene-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .scene-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .scene-card.cur { border-color: var(--primary); }
+  .scene-card.done { border-color: rgba(0, 102, 204, 0.3); }
+  .scene-card.pending { opacity: 0.7; }
+  .scene-card.empty { opacity: 0.5; }
+  .scene-thumb-lg {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .scene-card.empty .scene-thumb-lg { background: var(--canvas-parchment); box-shadow: none; }
+  .scene-card-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .scene-card-id {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: 2px;
+  }
+  .scene-card.cur .scene-card-id { color: var(--primary); font-weight: 600; }
+  .scene-card.done .scene-card-id { color: var(--primary); }
+  .scene-card-title {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+  }
+
+  /* ============ EPISODES — grid of episode cards ============ */
+  .episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--s-lg);
+  }
+  .episode-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .episode-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .episode-card.cur { border-color: var(--primary); }
+  .episode-card.done { border-color: rgba(0, 102, 204, 0.3); }
+  .episode-card.empty { opacity: 0.55; }
+  .episode-card.new-episode { border-style: dashed; background: transparent; }
+  .episode-card.new-episode:hover { border-color: var(--primary); }
+  .episode-thumb {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .episode-thumb.empty {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .episode-card.empty .episode-thumb { background: var(--canvas-parchment); box-shadow: none; }
+  .episode-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .episode-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: 2px;
+  }
+  .episode-card.cur .episode-meta { color: var(--primary); font-weight: 600; }
+  .episode-card.done .episode-meta { color: var(--primary); }
+  .episode-name {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    margin-bottom: var(--s-sm);
+  }
+  .episode-bar {
+    height: 3px;
+    background: var(--divider-soft);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+  }
+  .episode-bar .fill { height: 100%; background: var(--primary); border-radius: var(--r-pill); }
+  .episode-bar .fill.done { background: rgba(0, 102, 204, 0.6); }
+
+  /* ============ scenes-row (used elsewhere; kept for board filmstrip-like patterns) ============ */
+  .ep-section { margin-bottom: var(--s-xl); }
+  .scenes-row {
+    display: flex;
+    gap: var(--s-md);
+    overflow-x: auto;
+    padding: 4px 0 var(--s-sm);
+    scroll-snap-type: x mandatory;
+    margin: 0 calc(-1 * var(--s-xl));
+    padding-left: var(--s-xl);
+    padding-right: var(--s-xl);
+  }
+  .scenes-row::-webkit-scrollbar { height: 6px; }
+  .scenes-row::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: var(--r-pill); }
+  .scene-card {
+    flex: 0 0 240px;
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s;
+    scroll-snap-align: start;
+  }
+  .scene-card:hover { transform: translateY(-2px); }
+  .scene-card.cur { outline: 2px solid var(--primary); }
+  .scene-card.pending { opacity: 0.7; }
+  .scene-card.empty { opacity: 0.4; }
+  .scene-thumb-lg {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+  }
+  .scene-card.empty .scene-thumb-lg { background: var(--canvas-parchment); box-shadow: none; }
+  .scene-card-body { padding: var(--s-sm) var(--s-md) var(--s-md); }
+  .scene-card-id {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: 2px;
+  }
+  .scene-card.cur .scene-card-id { color: var(--primary); font-weight: 600; }
+  .scene-card-title {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+  }
+
+  /* ============ SCENE PAGE (3-phase scroll) ============ */
+  .scene-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--s-xl) var(--s-xl) var(--s-section);
+  }
+  .phase-section {
+    margin-bottom: var(--s-section);
+    scroll-margin-top: 120px;
+  }
+  .phase-section.locked { opacity: 0.65; }
+  .phase-header {
+    display: flex; align-items: flex-start; gap: var(--s-md);
+    padding-bottom: var(--s-md);
+    margin-bottom: var(--s-lg);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .phase-num {
+    width: 36px; height: 36px;
+    border-radius: var(--r-pill);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    color: var(--ink-48);
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .phase-num.done { background: var(--primary); color: var(--canvas); border-color: var(--primary); }
+  .phase-num.cur { background: var(--primary); color: var(--canvas); border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.15); }
+  .phase-text { flex: 1; }
+  .phase-title {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.374px;
+    margin-bottom: 4px;
+  }
+  .phase-sub {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+  .phase-status-tag {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-text);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    letter-spacing: -0.224px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .phase-status-tag .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .phase-status-tag.done { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+  .phase-status-tag.done .dot { background: var(--primary); }
+  .phase-status-tag.cur { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+  .phase-status-tag.cur .dot { background: var(--primary); animation: tag-pulse 1.8s infinite; }
+  .phase-status-tag.locked { background: var(--divider-soft); color: var(--ink-48); }
+  .phase-status-tag.locked .dot { background: var(--ink-48); }
+  @keyframes tag-pulse {
+    0% { box-shadow: 0 0 0 0 var(--primary); }
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  /* Phase 1 master shot — grid of cards */
+  .canvas-wrap-inline {
+    background:
+      radial-gradient(circle at 30% 40%, #ececef 0, transparent 35%),
+      radial-gradient(circle at 75% 65%, #ececef 0, transparent 35%),
+      var(--canvas-parchment);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    margin-bottom: var(--s-md);
+    min-height: 200px;
+  }
+  .canvas-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--s-md);
+    position: relative;
+  }
+  .canvas-inner .shot-card {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100%;
+  }
+  .canvas-inner .shot-card .img {
+    width: 100%; height: auto;
+    aspect-ratio: 16/9;
+  }
+
+  .phase-dock {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-pill);
+    padding: 8px 8px 8px 20px;
+    display: flex; align-items: center; gap: var(--s-sm);
+  }
+  .phase-dock .prompt-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    height: 40px;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    padding: 0;
+  }
+  .phase-dock .prompt-input::placeholder { color: var(--ink-48); }
+  .phase-dock .prompt-meta {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+
+  /* Phase 2 sequence strip inline (was absolute) */
+  .sequence-strip-inline {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md) var(--s-lg);
+    margin: var(--s-md) 0;
+  }
+
+  /* Phase 3 video preview */
+  .video-preview {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .timeline-mock {
+    display: flex;
+    gap: var(--s-sm);
+    overflow-x: auto;
+    padding-bottom: var(--s-md);
+    margin-bottom: var(--s-md);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .timeline-clip { flex: 0 0 140px; display: flex; flex-direction: column; gap: 4px; }
+  .clip-thumb {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+  }
+  .timeline-clip.empty .clip-thumb {
+    background: var(--canvas-parchment);
+    box-shadow: none;
+    border: 1px dashed var(--hairline);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-48);
+    font-family: var(--font-text);
+    font-size: 13px;
+  }
+  .timeline-clip.empty span { align-self: center; }
+  .clip-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    text-align: center;
+    letter-spacing: -0.12px;
+  }
+  .video-locked-note {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    line-height: 1.43;
+  }
+
+  /* ============ Legacy board layout (only for asset/old screens that still use .board) ============ */
+  .board { height: 100%; display: flex; flex-direction: column; background: var(--canvas-parchment); }
+
+  .board-toolbar {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--divider-soft);
+    padding: var(--s-md) var(--s-xl);
+    display: flex; align-items: center; gap: var(--s-md);
+    flex-shrink: 0;
+  }
+  .crumbs {
+    display: flex; align-items: center; gap: var(--s-xs);
+    font-family: var(--font-text);
+    font-size: 14px;
+    letter-spacing: -0.224px;
+  }
+  .crumbs a { color: var(--ink-48); cursor: pointer; transition: color 0.15s; }
+  .crumbs a:hover { color: var(--primary); }
+  .crumbs .sep { color: var(--ink-48); }
+  .crumbs .cur { color: var(--ink); font-weight: 600; }
+  .board-toolbar .right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+  .board-toolbar .count {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+
+  .canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+  .canvas {
+    position: absolute; inset: 0;
+    overflow: auto;
+    padding: var(--s-xl) var(--s-xl) 180px;
+  }
+  .canvas-inner { position: relative; min-height: 100%; }
+
+  .canvas-section-label {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-sm);
+  }
+
+  /* shot card — white tile, no border, image gets shadow */
+  .shot-card {
+    position: absolute;
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: var(--s-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s, opacity 0.25s;
+  }
+  .shot-card .img {
+    width: 168px; height: 94px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .shot-card .meta-row {
+    display: flex; align-items: center; gap: 6px;
+    padding-top: var(--s-sm);
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .shot-card .title {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+  }
+  .shot-card .star {
+    color: var(--primary);
+    font-size: 13px;
+  }
+  .shot-card .check {
+    margin-left: auto;
+    color: var(--primary);
+    font-size: 13px;
+  }
+  .shot-card:hover { transform: translateY(-2px); }
+  .shot-card.master .title { color: var(--primary); }
+  .shot-card.rejected { opacity: 0.4; }
+  .shot-card.rejected .title { color: var(--ink-48); }
+
+  .shot-card.generating {
+    background: var(--surface-pearl);
+    border: 1px dashed var(--hairline);
+    cursor: default;
+  }
+  .shot-card.generating .img {
+    background: linear-gradient(110deg, var(--surface-pearl) 8%, var(--divider-soft) 18%, var(--surface-pearl) 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    box-shadow: none;
+  }
+  .shot-card.generating .title { color: var(--primary); font-size: 12px; font-weight: 400; }
+
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  @keyframes fadein { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+  .shot-card.appearing { animation: fadein 0.35s ease-out; }
+
+  /* hover toolbar — Apple pill style */
+  .card-toolbar {
+    position: absolute;
+    top: -42px; left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-pill);
+    padding: 4px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 2px;
+    width: max-content;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .shot-card:hover .card-toolbar {
+    opacity: 1; pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  .shot-card.generating:hover .card-toolbar { opacity: 0; pointer-events: none; }
+  .card-toolbar .ct-btn {
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-80);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .card-toolbar .ct-btn:hover { background: var(--divider-soft); }
+  .card-toolbar .ct-btn.primary { background: var(--primary); color: var(--canvas); }
+  .card-toolbar .ct-btn.primary:hover { background: var(--primary-focus); }
+  .card-toolbar .ct-btn.reject:hover { color: var(--ink); }
+
+  /* cursor */
+  .cursor { position: absolute; pointer-events: none; transition: top 0.8s ease-out, left 0.8s ease-out; }
+  .cursor svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); display: block; }
+  .cursor .name {
+    display: inline-block;
+    margin-left: 14px; margin-top: -4px;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--canvas);
+    letter-spacing: -0.12px;
+  }
+
+  /* sticky bar — Apple's floating-sticky-bar */
+  .sticky-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(245, 245, 247, 0.92);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--divider-soft);
+    height: 80px;
+    padding: 16px var(--s-xl);
+    display: flex; gap: var(--s-md); align-items: center;
+    z-index: 11;
+  }
+  .prompt-input {
+    flex: 1; height: 44px;
+    background: var(--canvas);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--r-pill);
+    padding: 0 20px;
+    font-family: var(--font-text);
+    font-size: 17px;
+    letter-spacing: -0.374px;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .prompt-input:focus { border-color: var(--primary); }
+  .prompt-input::placeholder { color: var(--ink-48); }
+  .prompt-meta {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+
+  /* scene strip */
+  .scene-strip {
+    position: absolute;
+    bottom: 80px; left: 0; right: 0;
+    background: var(--canvas);
+    border-top: 1px solid var(--divider-soft);
+    height: 76px;
+    padding: 12px var(--s-xl);
+    display: flex; gap: var(--s-sm); align-items: center;
+    overflow-x: auto;
+    z-index: 10;
+  }
+  .scene-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; cursor: pointer; }
+  .scene-thumb {
+    width: 80px; height: 44px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #2a3340, #3a2d2d);
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-product);
+    transition: transform 0.15s;
+  }
+  .scene-item:hover .scene-thumb { transform: translateY(-2px); }
+  .scene-thumb.done { border-color: var(--primary); }
+  .scene-thumb.cur { border: 2px solid var(--primary); }
+  .scene-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+  }
+  .scene-label.cur { color: var(--primary); font-weight: 600; }
+
+  /* asset drawer */
+  .drawer {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 360px;
+    background: var(--canvas);
+    border-left: 1px solid var(--hairline);
+    padding: var(--s-xl);
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+    z-index: 30;
+    overflow-y: auto;
+  }
+  .drawer.open { transform: translateX(0); box-shadow: -16px 0 40px rgba(0,0,0,0.06); }
+  .drawer-head { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-lg); }
+  .drawer-head .title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+  }
+  .drawer-close {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--ink-48);
+    font-size: 17px;
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+  }
+  .drawer-close:hover { color: var(--ink); background: var(--divider-soft); }
+  .drawer-tabs { display: flex; gap: var(--s-xs); margin-bottom: var(--s-md); }
+  .drawer-tab {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    border: 1px solid transparent;
+    letter-spacing: -0.224px;
+  }
+  .drawer-tab.on { color: var(--primary); border-color: var(--primary); }
+  .drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-sm); }
+  .drawer-item {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-sm);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .drawer-item:hover { border-color: var(--ink-48); }
+  .drawer-thumb {
+    width: 100%; aspect-ratio: 3/4;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    margin-bottom: var(--s-xs);
+    box-shadow: var(--shadow-product);
+  }
+  .drawer-name {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.224px;
+  }
+  .drawer-mention { color: var(--primary); }
+  .drawer-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+
+  /* lightbox */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: saturate(180%) blur(20px);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    animation: fadein 0.2s ease-out;
+  }
+  .lightbox.open { display: flex; }
+  .lb-top {
+    padding: var(--s-md) var(--s-xl);
+    display: flex; align-items: center; gap: var(--s-md);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .lb-title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+  }
+  .lb-actions { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+  .lb-hint {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+  }
+  .lb-close {
+    cursor: pointer;
+    color: var(--ink-48);
+    padding: 6px 12px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-text);
+    font-size: 14px;
+  }
+  .lb-close:hover { color: var(--ink); background: var(--divider-soft); }
+  .lb-body { flex: 1; display: flex; gap: var(--s-lg); padding: var(--s-xl); }
+  .lb-pane { flex: 1; display: flex; flex-direction: column; gap: var(--s-sm); cursor: pointer; }
+  .lb-pane.cur .lb-image { outline: 2px solid var(--primary); outline-offset: 4px; }
+  .lb-image {
+    flex: 1; min-height: 0;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+  }
+  .lb-meta {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    display: flex; gap: var(--s-md);
+  }
+  .lb-bottom {
+    padding: var(--s-md) var(--s-xl);
+    border-top: 1px solid var(--divider-soft);
+    display: flex; gap: var(--s-md);
+    justify-content: flex-end;
+  }
+
+  /* comments */
+  .comments {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 360px;
+    background: var(--canvas);
+    border-left: 1px solid var(--hairline);
+    padding: var(--s-xl);
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+    z-index: 20;
+    overflow-y: auto;
+  }
+  .comments.open { transform: translateX(0); box-shadow: -16px 0 40px rgba(0,0,0,0.06); }
+  .com-head { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-md); }
+  .com-head .title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+  }
+  .com-target {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--primary);
+    letter-spacing: -0.224px;
+  }
+  .com-close { margin-left: auto; cursor: pointer; color: var(--ink-48); padding: 4px 8px; }
+  .com-close:hover { color: var(--ink); }
+  .com-item {
+    padding: var(--s-md) 0;
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .com-item:last-child { border-bottom: 0; }
+  .com-meta {
+    display: flex; align-items: center; gap: var(--s-xs);
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    margin-bottom: var(--s-xs);
+    letter-spacing: -0.12px;
+  }
+  .com-avatar {
+    width: 20px; height: 20px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    color: var(--canvas);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .com-who {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .com-msg {
+    font-family: var(--font-text);
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+    margin-bottom: var(--s-sm);
+  }
+  .com-actions { display: flex; gap: var(--s-md); }
+  .com-action {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--primary);
+    cursor: pointer;
+    letter-spacing: -0.224px;
+  }
+  .com-action.muted { color: var(--ink-48); }
+  .com-composer {
+    background: var(--canvas-parchment);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    margin-top: var(--s-md);
+  }
+  .com-composer textarea {
+    width: 100%;
+    min-height: 60px;
+    background: transparent;
+    font-family: var(--font-text);
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    resize: vertical;
+  }
+  .com-send {
+    margin-top: var(--s-xs);
+    margin-left: auto;
+    display: block;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 110px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--canvas);
+    padding: 12px 20px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 14px;
+    letter-spacing: -0.224px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ============ STORYBOARD ============ */
+  .storyboard-body {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--s-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .master-ref {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+  .master-ref-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: -0.12px;
+    text-transform: uppercase;
+    margin-bottom: var(--s-xs);
+  }
+  .master-ref-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    outline: 1.5px solid var(--primary);
+    outline-offset: 0;
+    margin-bottom: var(--s-sm);
+  }
+  .master-ref-desc {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    line-height: 1.43;
+  }
+
+  .cuts-heading {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+    margin-bottom: var(--s-md);
+  }
+  .cuts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--s-md);
+  }
+  .cut-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .cut-card:hover { transform: translateY(-2px); border-color: var(--ink-48); }
+  .cut-card.used { border-color: var(--primary); }
+  .cut-card.used:hover { border-color: var(--primary-focus); }
+  .cut-thumb {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .cut-frame {
+    position: absolute;
+    top: var(--s-xs); left: var(--s-xs);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--ink);
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.12px;
+  }
+  .cut-pos {
+    position: absolute;
+    top: var(--s-xs); right: var(--s-xs);
+    background: var(--primary);
+    color: var(--canvas);
+    width: 22px; height: 22px;
+    border-radius: var(--r-pill);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-text);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .cut-card.generating {
+    border: 1px dashed var(--hairline);
+    background: var(--canvas-parchment);
+    cursor: default;
+  }
+  .cut-card.generating .cut-thumb {
+    background: linear-gradient(110deg, var(--canvas-parchment) 8%, var(--divider-soft) 18%, var(--canvas-parchment) 33%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    box-shadow: none;
+  }
+  .cut-meta-row {
+    padding: var(--s-xs) var(--s-md) 0;
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+  }
+  .cut-card.used .cut-meta-row .cut-dur { color: var(--primary); font-weight: 600; }
+  .cut-caption {
+    padding: 2px var(--s-md) var(--s-md);
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.43;
+    letter-spacing: -0.224px;
+  }
+
+  /* sequence strip — between cuts grid and dock */
+  .sequence-strip {
+    position: absolute;
+    bottom: 100px;
+    left: 0; right: 0;
+    background: var(--canvas);
+    border-top: 1px solid var(--divider-soft);
+    border-bottom: 1px solid var(--divider-soft);
+    padding: var(--s-sm) var(--s-xl);
+    z-index: 10;
+  }
+  .seq-strip-head { display: flex; align-items: baseline; gap: var(--s-md); margin-bottom: var(--s-xs); }
+  .seq-strip-title {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+  }
+  .seq-strip-meta {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+  }
+  .seq-cells {
+    display: flex;
+    gap: var(--s-xs);
+    align-items: center;
+    overflow-x: auto;
+  }
+  .seq-cells::-webkit-scrollbar { height: 4px; }
+  .seq-cells::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: var(--r-pill); }
+  .seq-cell {
+    flex: 0 0 96px;
+    display: flex; flex-direction: column; gap: 2px; align-items: center;
+    cursor: pointer;
+  }
+  .seq-cell.active .seq-thumb { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .seq-thumb {
+    width: 96px; height: 54px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .seq-frame {
+    position: absolute;
+    top: 3px; left: 3px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--ink);
+    padding: 1px 6px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .seq-num {
+    font-family: var(--font-text);
+    font-size: 11px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+  }
+  .seq-cell.active .seq-num { color: var(--primary); font-weight: 600; }
+  .seq-arrow {
+    color: var(--ink-48);
+    font-size: 16px;
+    align-self: center;
+  }
+  .seq-cell.drop {
+    flex: 0 0 96px;
+    height: 54px;
+    border: 1px dashed var(--hairline);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    cursor: pointer;
+  }
+  .seq-cell.drop:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* ============ CHARACTER EDITOR ============ */
+  .editor-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--s-xl) var(--s-xl) var(--s-section);
+  }
+  .editor-header {
+    display: flex; align-items: flex-end; gap: var(--s-md);
+    margin: var(--s-lg) 0 var(--s-xl);
+    padding-bottom: var(--s-lg);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .editor-eyebrow {
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: -0.12px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .editor-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .editor-actions { margin-left: auto; display: flex; gap: var(--s-sm); }
+
+  .editor-body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--s-xxl);
+    align-items: start;
+  }
+  .editor-left { display: flex; flex-direction: column; gap: var(--s-md); }
+  .editor-portrait { display: flex; flex-direction: column; gap: var(--s-sm); margin-bottom: var(--s-sm); }
+  .portrait-frame {
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+  }
+  .portrait-replace { align-self: center; }
+
+  .editor-right { display: flex; flex-direction: column; gap: var(--s-lg); }
+  .editor-field { display: flex; flex-direction: column; gap: 6px; }
+  .editor-label {
+    font-family: var(--font-text);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    text-transform: uppercase;
+  }
+  .editor-input, .editor-select, .editor-textarea {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: 10px 14px;
+    font-family: var(--font-text);
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: -0.374px;
+    transition: border-color 0.15s;
+  }
+  .editor-input.mono, .editor-select.mono { font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; }
+  .editor-input:focus, .editor-textarea:focus, .editor-combo:focus { border-color: var(--primary); outline: none; }
+
+  .editor-combo {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='none' stroke='%231d1d1f' stroke-width='1.5' d='M1 1.5 L6 6 L11 1.5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  .editor-textarea { min-height: 130px; resize: vertical; line-height: 1.47; }
+  .editor-helper {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-top: 2px;
+  }
+  .editor-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-sm); }
+  .upload-zone {
+    background: var(--canvas-parchment);
+    border: 1px dashed var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--s-xl);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .upload-zone:hover { border-color: var(--primary); }
+  .upload-plus { font-size: 28px; font-weight: 300; color: var(--ink-48); line-height: 1; }
+  .upload-text { font-family: var(--font-text); font-size: 13px; color: var(--ink-48); letter-spacing: -0.224px; }
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    padding: 5px 11px;
+    border-radius: var(--r-pill);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+    cursor: pointer;
+  }
+  .tag.plus { background: transparent; color: var(--ink-48); font-size: 16px; font-weight: 300; line-height: 1; padding: 3px 11px; }
+  .tag:hover { border-color: var(--ink-48); }
+  .editor-section {
+    background: var(--canvas-parchment);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .editor-section.danger { background: rgba(204, 102, 102, 0.05); }
+  .editor-section-head {
+    display: flex; align-items: center; gap: var(--s-md);
+    margin-bottom: 4px;
+  }
+  .editor-section-title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.231px;
+  }
+  .editor-section-head .btn-ghost { margin-left: auto; }
+  .editor-section-desc {
+    font-family: var(--font-text);
+    font-size: 13px;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-md);
+  }
+
+  /* Wizard stepper + footer */
+  .wizard-stepper {
+    display: flex; align-items: center; gap: var(--s-sm);
+    padding: 0 0 var(--s-xl);
+    margin-bottom: var(--s-xl);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+  .wstep { display: flex; align-items: center; gap: var(--s-xs); opacity: 0.45; transition: opacity 0.15s; }
+  .wstep.active, .wstep.done { opacity: 1; }
+  .wstep-num {
+    width: 28px; height: 28px;
+    border-radius: var(--r-pill);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    color: var(--ink-48);
+    font-family: var(--font-text);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wstep.active .wstep-num { background: var(--primary); color: var(--canvas); border-color: var(--primary); }
+  .wstep.done .wstep-num { background: var(--primary); color: var(--canvas); border-color: var(--primary); }
+  .wstep-label {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink);
+    letter-spacing: -0.224px;
+  }
+  .wstep.active .wstep-label { color: var(--primary); font-weight: 600; }
+  .wstep-line { flex: 1; height: 1px; background: var(--divider-soft); }
+
+  .wizard-footer {
+    display: flex; gap: var(--s-sm); align-items: center;
+    margin-top: var(--s-xl);
+    padding-top: var(--s-lg);
+    border-top: 1px solid var(--divider-soft);
+  }
+  .wizard-footer .btn-ghost:first-child { margin-right: auto; }
+
+  .upload-zone.large {
+    aspect-ratio: 3/4;
+    padding: var(--s-xl) 0;
+    justify-content: center;
+  }
+  .upload-zone.large .upload-text { text-align: center; line-height: 1.5; }
+
+  /* ============ ASSET (변주) ============ */
+  .asset-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--s-xxl) var(--s-xl) var(--s-section);
+  }
+  .asset-hero {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--s-xxl);
+    margin-bottom: var(--s-xl);
+    align-items: start;
+  }
+  .canon-card {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: 0;
+    overflow: hidden;
+  }
+  .canon-img {
+    width: 100%; aspect-ratio: 3/4;
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    box-shadow: var(--shadow-product);
+  }
+  .canon-body { padding: var(--s-md); }
+  .canon-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.14;
+    margin-bottom: var(--s-xs);
+  }
+  .canon-name .mention { color: var(--primary); }
+  .canon-tag {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: -0.12px;
+    margin-bottom: var(--s-xs);
+    text-transform: uppercase;
+  }
+  .canon-desc {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-80);
+    line-height: 1.43;
+    letter-spacing: -0.224px;
+  }
+
+  .variants-side h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.14;
+    margin-bottom: var(--s-xs);
+  }
+  .variants-side .lede {
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: var(--ink-80);
+    margin-bottom: var(--s-lg);
+  }
+  .variants-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--s-md);
+  }
+  .variant-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-sm);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .variant-card:hover { border-color: var(--ink-48); transform: translateY(-2px); }
+  .variant-card.cur { border-color: var(--primary); border-width: 2px; padding: calc(var(--s-sm) - 1px); }
+  .variant-img {
+    width: 100%; aspect-ratio: 3/4;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3a2d2d, #2a3340);
+    margin-bottom: var(--s-sm);
+    box-shadow: var(--shadow-product);
+    position: relative;
+  }
+  .variant-ep {
+    position: absolute;
+    top: var(--s-xs); left: var(--s-xs);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-text);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.12px;
+  }
+  .variant-name {
+    font-family: var(--font-text);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.24;
+    letter-spacing: -0.374px;
+    margin-bottom: 2px;
+    padding-left: 4px;
+  }
+  .variant-eps {
+    font-family: var(--font-text);
+    font-size: 12px;
+    color: var(--ink-48);
+    letter-spacing: -0.12px;
+    margin-bottom: var(--s-xs);
+    padding-left: 4px;
+  }
+  .variant-change {
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--ink-80);
+    line-height: 1.43;
+    letter-spacing: -0.224px;
+    padding: 0 4px 4px;
+  }
+  .variant-change .add { color: var(--primary); }
+  .variant-card.empty {
+    border-style: dashed;
+    background: transparent;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 200px;
+    padding: var(--s-lg);
+    color: var(--ink-48);
+    text-align: center;
+  }
+  .variant-card.empty .plus { font-size: 32px; font-weight: 300; line-height: 1; margin-bottom: var(--s-xs); }
+  .variant-card.empty .label { font-size: 14px; font-family: var(--font-text); letter-spacing: -0.224px; }
+
+  /* ============ BLUEPRINT ============ */
+  .blueprint-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--s-section) var(--s-xl);
+    text-align: center;
+  }
+  .blueprint-tag {
+    display: inline-block;
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: -0.224px;
+    text-transform: uppercase;
+    margin-bottom: var(--s-lg);
+  }
+  .blueprint-wrap h2 {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: var(--s-md);
+  }
+  .blueprint-wrap .lede {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink-80);
+    margin-bottom: var(--s-xl);
+  }
+  .blueprint-detail {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    text-align: left;
+    margin-bottom: var(--s-xl);
+  }
+  .blueprint-detail h4 {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-48);
+    letter-spacing: -0.224px;
+    text-transform: uppercase;
+    margin-bottom: var(--s-sm);
+  }
+  .blueprint-detail ul { list-style: none; }
+  .blueprint-detail li {
+    font-family: var(--font-text);
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.47;
+    padding: 6px 0;
+    letter-spacing: -0.374px;
+  }
+  .blueprint-cta-row { display: flex; gap: var(--s-sm); justify-content: center; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="global-nav">
+    <span class="brand" data-nav="home" style="cursor: pointer;">FilmMaker</span>
+    <div class="global-nav-links">
+      <a data-nav="home">프로젝트</a>
+      <a data-nav="settings">설정</a>
+    </div>
+    <div class="right">
+      <div class="av-stack" id="av-stack">
+        <div class="av director" title="김디렉터">김</div>
+        <div class="av av-pink" title="박크">박</div>
+        <div class="av av-violet" title="최크">최</div>
+        <div class="av av-blue" title="이크">이</div>
+      </div>
+    </div>
+  </nav>
+
+  <nav class="sub-nav" id="sub-nav">
+    <span class="category" data-nav="dashboard" style="cursor: pointer;">비글루 시즌 2</span>
+    <div class="links">
+      <a data-nav="dashboard">대시보드</a>
+      <a data-nav="episodes">회차</a>
+      <a data-nav="asset">에셋</a>
+      <a data-nav="refs">참고자료</a>
+      <button class="primary-cta" data-nav="board">새 마스터샷</button>
+    </div>
+  </nav>
+
+  <nav class="scene-context" id="scene-context">
+    <div class="sc-crumb">
+      <a data-nav="episode-ep03">EP 03</a>
+      <span class="sc-sep">›</span>
+      <span class="sc-cur" id="scene-name">Scene 12 — 병실 충돌</span>
+    </div>
+    <div class="sc-stages">
+      <a data-nav="board">마스터샷</a>
+      <a data-nav="storyboard">스토리보드</a>
+      <a data-nav="video">영상</a>
+    </div>
+  </nav>
+
+  <main class="stage">
+
+    <!-- ========== PROJECTS (HOME) ========== -->
+    <section class="screen" data-screen="home">
+      <div class="projects-wrap">
+        <div class="projects-greeting">안녕하세요, 김디렉터</div>
+        <h1 class="projects-title">프로젝트</h1>
+
+        <div class="projects-search">
+          <span class="leading">⌕</span>
+          <input placeholder="프로젝트 이름 검색">
+          <span class="prompt-meta">⌘ K</span>
+        </div>
+
+        <div class="projects-grid" id="projects-grid">
+          <div class="project-card starred" data-pid="biglu-s2">
+            <button class="star-btn" data-star title="우선순위에서 내리기">★</button>
+            <div class="proj-clickable" data-go="dashboard">
+              <div class="project-cover">
+                <div class="item-presence">
+                  <div class="av-mini director" title="김디렉터">김</div>
+                  <div class="av-mini pink" title="박크">박</div>
+                  <div class="av-mini violet" title="최크">최</div>
+                  <div class="av-mini blue" title="이크">이</div>
+                </div>
+              </div>
+              <div class="project-meta">활성 · 팀 5명 · D-12</div>
+              <div class="project-name">비글루 시즌 2</div>
+              <div class="project-stats">
+                <div class="project-stat">
+                  <span class="num">54%</span>
+                  <span class="label">진척</span>
+                </div>
+                <div class="project-stat">
+                  <span class="num alert">4</span>
+                  <span class="label">결정 대기</span>
+                </div>
+                <div class="project-stat">
+                  <span class="num">11</span>
+                  <span class="label">회차</span>
+                </div>
+              </div>
+              <div class="project-bar"><div class="fill" style="width: 54%;"></div></div>
+            </div>
+          </div>
+
+          <div class="project-card" data-pid="biglu-s1">
+            <button class="star-btn" data-star title="우선순위 올리기">☆</button>
+            <div class="proj-clickable">
+              <div class="project-cover" style="background: linear-gradient(135deg, #2a3340, #1a3548);"></div>
+              <div class="project-meta">완료 · 2025</div>
+              <div class="project-name">비글루 시즌 1</div>
+              <div class="project-stats" style="opacity: 0.6;">
+                <div class="project-stat">
+                  <span class="num">100%</span>
+                  <span class="label">완료</span>
+                </div>
+                <div class="project-stat">
+                  <span class="num">192</span>
+                  <span class="label">씬</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card" data-pid="draft">
+            <button class="star-btn" data-star title="우선순위 올리기">☆</button>
+            <div class="proj-clickable">
+              <div class="project-cover" style="background: linear-gradient(135deg, #3a2d20, #2a2d20);"></div>
+              <div class="project-meta">초안 · 2명 · 기획</div>
+              <div class="project-name">미정 영화 프로젝트</div>
+              <div class="project-stats" style="opacity: 0.6;">
+                <div class="project-stat">
+                  <span class="num">3</span>
+                  <span class="label">씬</span>
+                </div>
+                <div class="project-stat">
+                  <span class="num">2</span>
+                  <span class="label">캐릭터</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-card new-project">
+            <div class="proj-clickable" data-go="project-new">
+              <div class="project-cover empty">+</div>
+              <div class="project-meta">위저드로 시작</div>
+              <div class="project-name" style="color: var(--ink-48);">새 프로젝트</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== NEW PROJECT WIZARD ========== -->
+    <section class="screen" data-screen="project-new">
+      <div class="editor-wrap">
+        <span class="back-link" data-go="home">프로젝트</span>
+
+        <div class="editor-header">
+          <div>
+            <div class="editor-eyebrow">새 프로젝트</div>
+            <h1 class="editor-title">프로젝트 시작</h1>
+          </div>
+        </div>
+
+        <div class="wizard-stepper">
+          <div class="wstep active"><span class="wstep-num">1</span><span class="wstep-label">기본 정보</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">2</span><span class="wstep-label">대본 업로드</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">3</span><span class="wstep-label">에셋 초기화</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">4</span><span class="wstep-label">팀 초대</span></div>
+        </div>
+
+        <div class="editor-body">
+
+          <aside class="editor-left">
+            <div class="upload-zone large">
+              <span class="upload-plus">+</span>
+              <span class="upload-text">대표 이미지<br>드래그 또는 클릭</span>
+            </div>
+            <div class="editor-helper">홈 화면에서 보여질 커버. 나중에 변경 가능.</div>
+          </aside>
+
+          <main class="editor-right">
+            <div class="editor-grid-2">
+              <div class="editor-field">
+                <label class="editor-label">작품 유형</label>
+                <select class="editor-input editor-combo">
+                  <option value="series">시리즈 — 연속 회차 드라마</option>
+                  <option value="film">영화 — 단일 작품</option>
+                </select>
+              </div>
+              <div class="editor-field">
+                <label class="editor-label">프로젝트 이름</label>
+                <input class="editor-input" placeholder="예: 비글루 시즌 3">
+              </div>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">한 줄 설명</label>
+              <input class="editor-input" placeholder="예: 메디컬 드라마 · 12회 · 6주 일정">
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">로그라인</label>
+              <textarea class="editor-textarea" placeholder="작품의 핵심 아이디어를 한두 문장으로. AI가 이후 단계에서 톤·캐릭터 추출에 참고합니다."></textarea>
+            </div>
+
+          </main>
+
+        </div>
+
+        <div class="wizard-footer">
+          <button class="btn-ghost" data-go="home" style="font-size: 14px; padding: 9px 18px;">취소</button>
+          <button class="btn-ghost" style="font-size: 14px; padding: 9px 18px; opacity: 0.4; pointer-events: none;">← 이전</button>
+          <button class="btn-primary" style="font-size: 14px; padding: 9px 18px;">다음 → 대본 업로드</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== DASHBOARD ========== -->
+    <section class="screen" data-screen="dashboard">
+      <div class="dash">
+        <div class="dash-header">
+          <h1 class="dash-title">오늘의 작업</h1>
+          <p class="dash-lede">2026년 5월 13일 수요일 · 비글루 시즌 2 마감까지 12일</p>
+        </div>
+
+        <div class="dash-row">
+          <div class="summary-card">
+            <div class="num">54%</div>
+            <div class="label">시즌 진척</div>
+            <div class="sub">192씬 중 104씬 완료</div>
+          </div>
+          <div class="summary-card">
+            <div class="num alert">4</div>
+            <div class="label">결정 대기</div>
+            <div class="sub">마스터샷 승인이 필요합니다</div>
+          </div>
+          <div class="summary-card">
+            <div class="num">14.2</div>
+            <div class="label">시간 / 일</div>
+            <div class="sub">최근 7일 GPU 평균 사용량</div>
+          </div>
+          <div class="summary-card">
+            <div class="num alert">2</div>
+            <div class="label">막힌 씬</div>
+            <div class="sub">3일 이상 진행 없음</div>
+          </div>
+        </div>
+
+        <div class="dash-split">
+          <div>
+            <h2 class="section-title">결정 대기</h2>
+            <div class="pending-list">
+              <div class="pending-card" data-go="board">
+                <div class="pending-thumb"></div>
+                <div class="pending-info">
+                  <div class="pending-where">EP 03 · Scene 12 — 병실 충돌</div>
+                  <div class="pending-title">마스터샷 24개 후보 도착</div>
+                  <div class="pending-meta">박크가 2분 전 업로드</div>
+                </div>
+                <span class="pill-link">리뷰</span>
+              </div>
+              <div class="pending-card">
+                <div class="pending-thumb" style="background: linear-gradient(135deg, #a08070, #7a8590);"></div>
+                <div class="pending-info">
+                  <div class="pending-where">EP 04 · Scene 07 — 새벽</div>
+                  <div class="pending-title">마스터샷 8개 후보</div>
+                  <div class="pending-meta">최크가 40분 전 업로드</div>
+                </div>
+                <span class="pill-link">리뷰</span>
+              </div>
+              <div class="pending-card">
+                <div class="pending-thumb" style="background: linear-gradient(135deg, #3a2d2d, #2a3340); filter: brightness(0.9);"></div>
+                <div class="pending-info">
+                  <div class="pending-where">EP 05 · Scene 03 — 비</div>
+                  <div class="pending-title">마스터샷 12개 후보</div>
+                  <div class="pending-meta">정크가 2시간 전 업로드</div>
+                </div>
+                <span class="pill-link">리뷰</span>
+              </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top: var(--s-xl);">최근 활동</h2>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-when">17분 전</div>
+                <div class="activity-text"><strong>이크</strong>가 EP 04 Scene 11 스토리보드 6/8 완료. <span class="pill-link">막힘 검토</span></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-when">1시간 전</div>
+                <div class="activity-text"><strong>최크</strong>가 EP 04 Scene 05 영상 가편 완료. 2.3초.</div>
+              </div>
+              <div class="activity-item" data-go="asset">
+                <div class="activity-when">2시간 전</div>
+                <div class="activity-text"><strong>@엘레나</strong>에 새 변주 "옷 찢어진" 추가됨</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 class="section-title">에피소드</h2>
+            <div class="episodes-grid">
+              <div class="ep-row">
+                <span class="ep-name">EP 02 · 약혼</span>
+                <div class="ep-strip">
+                  <div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div>
+                </div>
+                <span class="ep-prog done">12/12</span>
+              </div>
+              <div class="ep-row">
+                <span class="ep-name cur">EP 03 · 병실</span>
+                <div class="ep-strip">
+                  <div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell cur" data-go="board"></div><div class="ep-cell pending"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div>
+                </div>
+                <span class="ep-prog">11/14</span>
+              </div>
+              <div class="ep-row">
+                <span class="ep-name">EP 04 · 새벽</span>
+                <div class="ep-strip">
+                  <div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell done"></div><div class="ep-cell pending"></div><div class="ep-cell pending"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div>
+                </div>
+                <span class="ep-prog">5/12</span>
+              </div>
+              <div class="ep-row">
+                <span class="ep-name">EP 05 · 비</span>
+                <div class="ep-strip">
+                  <div class="ep-cell done"></div><div class="ep-cell pending"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div><div class="ep-cell empty"></div>
+                </div>
+                <span class="ep-prog">1/9</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== EPISODES ========== -->
+    <section class="screen" data-screen="episodes">
+      <div class="dash">
+        <div class="dash-header">
+          <h1 class="dash-title">회차</h1>
+          <p class="dash-lede">비글루 시즌 2 · 11회차 · 192씬</p>
+        </div>
+
+        <div class="episodes-grid">
+          <div class="episode-card done">
+            <div class="episode-thumb"></div>
+            <div class="episode-body">
+              <div class="episode-meta">완료 · 12 / 12 씬</div>
+              <div class="episode-name">EP 02 · 약혼</div>
+              <div class="episode-bar"><div class="fill done" style="width: 100%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card cur" data-go="episode-ep03">
+            <div class="episode-thumb" style="filter: brightness(1.05);">
+              <div class="item-presence">
+                <div class="av-mini director" title="김디렉터">김</div>
+                <div class="av-mini pink" title="박크">박</div>
+              </div>
+            </div>
+            <div class="episode-body">
+              <div class="episode-meta">진행중 · 11 / 14 씬</div>
+              <div class="episode-name">EP 03 · 병실</div>
+              <div class="episode-bar"><div class="fill" style="width: 79%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card">
+            <div class="episode-thumb" style="filter: hue-rotate(-15deg);">
+              <div class="item-presence">
+                <div class="av-mini violet" title="최크">최</div>
+                <div class="av-mini blue" title="이크">이</div>
+              </div>
+            </div>
+            <div class="episode-body">
+              <div class="episode-meta">진행중 · 5 / 12 씬</div>
+              <div class="episode-name">EP 04 · 새벽</div>
+              <div class="episode-bar"><div class="fill" style="width: 42%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card">
+            <div class="episode-thumb" style="filter: brightness(0.9);"></div>
+            <div class="episode-body">
+              <div class="episode-meta">착수 · 1 / 9 씬</div>
+              <div class="episode-name">EP 05 · 비</div>
+              <div class="episode-bar"><div class="fill" style="width: 11%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card empty">
+            <div class="episode-thumb"></div>
+            <div class="episode-body">
+              <div class="episode-meta">미착수</div>
+              <div class="episode-name">EP 06</div>
+              <div class="episode-bar"><div class="fill" style="width: 0%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card empty">
+            <div class="episode-thumb"></div>
+            <div class="episode-body">
+              <div class="episode-meta">미착수</div>
+              <div class="episode-name">EP 07</div>
+              <div class="episode-bar"><div class="fill" style="width: 0%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card empty">
+            <div class="episode-thumb"></div>
+            <div class="episode-body">
+              <div class="episode-meta">미착수</div>
+              <div class="episode-name">EP 08</div>
+              <div class="episode-bar"><div class="fill" style="width: 0%;"></div></div>
+            </div>
+          </div>
+
+          <div class="episode-card new-episode">
+            <div class="episode-thumb empty">+</div>
+            <div class="episode-body">
+              <div class="episode-meta">대본 업로드</div>
+              <div class="episode-name" style="color: var(--ink-48);">새 회차</div>
+              <div class="episode-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== EPISODE DETAIL — EP 03 ========== -->
+    <section class="screen" data-screen="episode-ep03">
+      <div class="dash">
+        <span class="back-link" data-nav="episodes">회차</span>
+        <div class="dash-header" style="margin-top: var(--s-md);">
+          <h1 class="dash-title">EP 03 · 병실</h1>
+          <p class="dash-lede">14씬 · 진행중 · 11 완료 · 김디렉터·박크 작업 중</p>
+        </div>
+
+        <div class="scenes-grid">
+          <div class="scene-card done" data-go="board">
+            <div class="scene-thumb-lg"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 09</div>
+              <div class="scene-card-title">입원</div>
+            </div>
+          </div>
+          <div class="scene-card done" data-go="board">
+            <div class="scene-thumb-lg" style="filter: hue-rotate(-10deg);"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 10</div>
+              <div class="scene-card-title">대치</div>
+            </div>
+          </div>
+          <div class="scene-card done" data-go="board">
+            <div class="scene-thumb-lg" style="filter: brightness(0.9);"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 11</div>
+              <div class="scene-card-title">선언</div>
+            </div>
+          </div>
+          <div class="scene-card cur" data-go="board">
+            <div class="scene-thumb-lg" style="filter: brightness(1.05);">
+              <div class="item-presence">
+                <div class="av-mini director" title="김디렉터">김</div>
+                <div class="av-mini pink" title="박크">박</div>
+              </div>
+            </div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 12 · 진행중</div>
+              <div class="scene-card-title">병실 충돌</div>
+            </div>
+          </div>
+          <div class="scene-card pending">
+            <div class="scene-thumb-lg" style="filter: brightness(0.85);"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 13 · 대기</div>
+              <div class="scene-card-title">엄마 등장</div>
+            </div>
+          </div>
+          <div class="scene-card empty">
+            <div class="scene-thumb-lg"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 14</div>
+              <div class="scene-card-title">결심</div>
+            </div>
+          </div>
+          <div class="scene-card empty">
+            <div class="scene-thumb-lg" style="filter: hue-rotate(10deg);"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 15</div>
+              <div class="scene-card-title">병원 떠남</div>
+            </div>
+          </div>
+          <div class="scene-card empty">
+            <div class="scene-thumb-lg" style="filter: brightness(0.95);"></div>
+            <div class="scene-card-body">
+              <div class="scene-card-id">Scene 16</div>
+              <div class="scene-card-title">집 도착</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCENE BOARD (Master shot stage) ========== -->
+    <!-- ========== SCENE BOARD (Phase 1 · Master shot) ========== -->
+    <section class="screen" data-screen="board">
+      <div class="scene-page">
+        <section class="phase-section" id="phase-master">
+          <header class="phase-header">
+            <div class="phase-num done">1</div>
+            <div class="phase-text">
+              <h2 class="phase-title">마스터샷</h2>
+              <p class="phase-sub">씬의 톤·공간·색감 기준 이미지. 모든 컷의 reference.</p>
+            </div>
+            <div class="phase-status-tag done"><span class="dot"></span>채택 · ★ Shot 02</div>
+          </header>
+
+          <div class="canvas-wrap-inline">
+            <div class="canvas-inner" id="canvas-inner"></div>
+          </div>
+
+          <div class="phase-dock">
+            <input class="prompt-input" id="dock-input" placeholder="@엘레나의 클로즈업, 차가운 색감 …">
+            <span class="prompt-meta">Seedream 5 · ×4</span>
+            <button class="btn-ghost" style="font-size: 14px; padding: 7px 17px;" id="open-drawer">캐릭터 패널</button>
+            <button class="btn-primary" id="dock-btn">새 후보 생성</button>
+          </div>
+        </section>
+      </div>
+
+      <aside class="drawer" id="drawer">
+        <div class="drawer-head">
+          <span class="title">캐릭터</span>
+          <span class="drawer-close" id="drawer-close">✕</span>
+        </div>
+        <div class="drawer-tabs">
+          <span class="drawer-tab on">캐릭터 12</span>
+          <span class="drawer-tab">배경 8</span>
+          <span class="drawer-tab">소품 23</span>
+        </div>
+        <div class="drawer-grid">
+          <div class="drawer-item" data-go="asset-elena">
+            <div class="drawer-thumb"></div>
+            <div class="drawer-name"><span class="drawer-mention">@</span>엘레나</div>
+            <div class="drawer-meta">14씬 · 변주 3</div>
+          </div>
+          <div class="drawer-item">
+            <div class="drawer-thumb" style="filter: hue-rotate(-30deg);"></div>
+            <div class="drawer-name"><span class="drawer-mention">@</span>이선</div>
+            <div class="drawer-meta">9씬</div>
+          </div>
+          <div class="drawer-item">
+            <div class="drawer-thumb" style="filter: brightness(0.85);"></div>
+            <div class="drawer-name"><span class="drawer-mention">@</span>사브리나</div>
+            <div class="drawer-meta">6씬</div>
+          </div>
+          <div class="drawer-item">
+            <div class="drawer-thumb" style="filter: brightness(1.1);"></div>
+            <div class="drawer-name"><span class="drawer-mention">@</span>닥터킴</div>
+            <div class="drawer-meta">3씬</div>
+          </div>
+        </div>
+      </aside>
+
+      <aside class="comments" id="comments">
+        <div class="com-head">
+          <span class="title">코멘트</span>
+          <span class="com-target" id="com-target-label">Shot 02</span>
+          <span class="com-close" id="com-close">✕</span>
+        </div>
+        <div id="comments-list"></div>
+        <div class="com-composer">
+          <textarea id="com-textarea" placeholder="코멘트 추가"></textarea>
+          <button class="btn-primary com-send" id="com-send" style="font-size: 14px; padding: 8px 16px;">등록</button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- ========== STORYBOARD (Phase 2) ========== -->
+    <section class="screen" data-screen="storyboard">
+      <div class="scene-page">
+        <section class="phase-section" id="phase-storyboard">
+          <header class="phase-header">
+            <div class="phase-num cur">2</div>
+            <div class="phase-text">
+              <h2 class="phase-title">스토리보드</h2>
+              <p class="phase-sub">컷별 분할과 시퀀스 순서. 마스터샷이 모든 컷의 기준.</p>
+            </div>
+            <button class="btn-primary" style="font-size: 14px; padding: 9px 18px;" data-go="script-cuts">✦ 대본으로 컷 생성</button>
+            <div class="phase-status-tag cur"><span class="dot"></span>진행중 · 7컷 · 12.4초</div>
+          </header>
+
+          <div class="storyboard-body">
+            <aside class="master-ref">
+              <div class="master-ref-label">기준 마스터샷 ★</div>
+              <div class="master-ref-img"></div>
+              <p class="master-ref-desc">차가운 그레이 톤, 미래적 의료 공간. 모든 컷에 자동 reference.</p>
+            </aside>
+
+            <div class="cuts-area">
+              <h3 class="cuts-heading">컷 후보 12 · 시퀀스 7</h3>
+              <div class="cuts-grid">
+                <div class="cut-card used"><div class="cut-thumb"><span class="cut-frame">WIDE</span><span class="cut-pos">1</span></div><div class="cut-meta-row"><span class="cut-dur">2.4s</span></div><div class="cut-caption">병실 전경, 엘레나가 사브리나를 밀어내려는 순간</div></div>
+                <div class="cut-card used"><div class="cut-thumb" style="filter: brightness(1.1);"><span class="cut-frame">CU</span><span class="cut-pos">2</span><div class="item-presence"><div class="av-mini director" title="김디렉터">김</div><div class="av-mini pink" title="박크">박</div></div></div><div class="cut-meta-row"><span class="cut-dur">1.8s</span></div><div class="cut-caption">엘레나 클로즈업, 차가운 시선</div></div>
+                <div class="cut-card used"><div class="cut-thumb" style="filter: brightness(0.9);"><span class="cut-frame">OTS</span><span class="cut-pos">3</span></div><div class="cut-meta-row"><span class="cut-dur">2.0s</span></div><div class="cut-caption">이선의 어깨 너머로 엘레나</div></div>
+                <div class="cut-card used"><div class="cut-thumb" style="filter: hue-rotate(-10deg);"><span class="cut-frame">MED</span><span class="cut-pos">4</span></div><div class="cut-meta-row"><span class="cut-dur">1.5s</span></div><div class="cut-caption">사브리나 바닥에서 일어남</div></div>
+                <div class="cut-card used"><div class="cut-thumb" style="filter: brightness(1.05) hue-rotate(5deg);"><span class="cut-frame">CU</span><span class="cut-pos">5</span></div><div class="cut-meta-row"><span class="cut-dur">1.9s</span></div><div class="cut-caption">엘레나 시선 이동</div></div>
+                <div class="cut-card generating"><div class="cut-thumb"></div><div class="cut-meta-row"><span class="cut-dur" style="color: var(--primary);">14초 · 64%</span></div><div class="cut-caption" style="color: var(--ink-48);">생성 중 …</div></div>
+                <div class="cut-card used"><div class="cut-thumb" style="filter: brightness(0.85);"><span class="cut-frame">WIDE</span><span class="cut-pos">6</span></div><div class="cut-meta-row"><span class="cut-dur">2.2s</span></div><div class="cut-caption">세 명 리액션 합쳐서</div></div>
+                <div class="cut-card"><div class="cut-thumb" style="filter: hue-rotate(15deg);"><span class="cut-frame">CU</span></div><div class="cut-meta-row"><span class="cut-dur">미사용</span></div><div class="cut-caption">이선 클로즈업 변주</div></div>
+                <div class="cut-card"><div class="cut-thumb" style="filter: brightness(0.95) hue-rotate(-5deg);"><span class="cut-frame">OTS</span></div><div class="cut-meta-row"><span class="cut-dur">미사용</span></div><div class="cut-caption">사브리나 어깨 너머 변주</div></div>
+                <div class="cut-card"><div class="cut-thumb" style="filter: brightness(0.7);"><span class="cut-frame">WIDE</span></div><div class="cut-meta-row"><span class="cut-dur">미사용</span></div><div class="cut-caption">로우 앵글 풀샷</div></div>
+                <div class="cut-card"><div class="cut-thumb" style="filter: brightness(1.15);"><span class="cut-frame">CU</span></div><div class="cut-meta-row"><span class="cut-dur">미사용</span></div><div class="cut-caption">엘레나 손 디테일</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sequence-strip-inline">
+            <div class="seq-strip-head">
+              <span class="seq-strip-title">시퀀스 · 12.4초</span>
+              <span class="seq-strip-meta">목표 ~30초 · 6컷 더 필요</span>
+            </div>
+            <div class="seq-cells">
+              <div class="seq-cell"><div class="seq-thumb"><span class="seq-frame">WIDE</span></div><span class="seq-num">1 · 2.4s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell active"><div class="seq-thumb" style="filter: brightness(1.1);"><span class="seq-frame">CU</span></div><span class="seq-num">2 · 1.8s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell"><div class="seq-thumb" style="filter: brightness(0.9);"><span class="seq-frame">OTS</span></div><span class="seq-num">3 · 2.0s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell"><div class="seq-thumb" style="filter: hue-rotate(-10deg);"><span class="seq-frame">MED</span></div><span class="seq-num">4 · 1.5s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell"><div class="seq-thumb" style="filter: brightness(1.05) hue-rotate(5deg);"><span class="seq-frame">CU</span></div><span class="seq-num">5 · 1.9s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell"><div class="seq-thumb" style="filter: brightness(0.85);"><span class="seq-frame">WIDE</span></div><span class="seq-num">6 · 2.2s</span></div>
+              <span class="seq-arrow">›</span>
+              <div class="seq-cell drop">+ 컷 추가</div>
+            </div>
+          </div>
+
+          <div class="phase-dock">
+            <input class="prompt-input" placeholder="@엘레나의 새 컷, 다른 각도 …">
+            <span class="prompt-meta">★ master 자동 첨부 · WIDE</span>
+            <button class="btn-primary">컷 생성</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ========== SCRIPT → CUTS (AI annotation) ========== -->
+    <section class="screen" data-screen="script-cuts">
+      <div class="scene-page" style="max-width: 1280px;">
+
+        <div class="sc-cuts-header">
+          <span class="back-link" data-go="storyboard">스토리보드</span>
+          <div class="sc-cuts-title-row">
+            <h2 class="phase-title" style="font-size: 28px;">✦ 대본으로 컷 생성</h2>
+            <span class="phase-sub">Scene 12 · 18 라인 · AI 제안 9컷</span>
+          </div>
+          <div class="sc-cuts-actions">
+            <span class="sc-cuts-count">채택 <strong>0</strong> / 9</span>
+            <button class="btn-ghost" style="font-size: 14px; padding: 9px 18px;">전체 재생성</button>
+            <button class="btn-primary" style="font-size: 14px; padding: 9px 18px;" data-go="storyboard">채택 항목 → 스토리보드</button>
+          </div>
+        </div>
+
+        <div class="annotation-pane">
+
+          <div class="ann-row heading-row">
+            <div class="ann-script heading">INT. 병실 — 낮</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script action">엘레나가 사브리나를 밀어내려는 손이 공중에 멈춘 채, 사브리나를 바라본다.</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb"><span class="cut-frame">WIDE</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">WIDE · 2.4s · 병실 전경</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(1.05);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.6s · 엘레나 손 디테일</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script action">그 순간, 이선이 병실 문을 거칠게 밀고 들어온다.</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(0.9);"><span class="cut-frame">WIDE</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">WIDE · 2.0s · 이선 문 박차고 들어옴</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script character">이선</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script paren">(외침)</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script dialogue">"Elena! Hey!!"</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(1.1);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.5s · 이선 외침</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script character">이선</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script paren">(분노로 일그러진 얼굴)</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script dialogue">"Damn it—can't you hear me?!"</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(1.15) hue-rotate(-5deg);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.8s · 이선 분노 표정</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script action">사브리나는 뒤로 넘어지며 바닥에 주저앉고, 문 쪽에 있는 이선을 바라본다.</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: hue-rotate(-10deg);"><span class="cut-frame">MED</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">MED · 1.5s · 사브리나 바닥에 주저앉음</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script action">엘레나가 천천히 돌아본다. 차가운 표정으로.</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(1.05);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.8s · 엘레나 차가운 시선</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script character">이선</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script dialogue">"You're really gonna divorce me?"</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(0.9);"><span class="cut-frame">OTS</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">OTS · 2.0s · 이선 시점에서 엘레나</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script paren">(당황스러워 살짝 화내며)</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script dialogue">"What did I even do wrong?"</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(1.05) hue-rotate(5deg);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.4s · 이선 당황</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script action">이선이 자신감 없는 듯 이어 말한다.</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script character">이선</div>
+            <div class="ann-cuts"></div>
+          </div>
+
+          <div class="ann-row">
+            <div class="ann-script dialogue">"Fine, the miscarriage..."</div>
+            <div class="ann-cuts">
+              <div class="cut-suggest">
+                <div class="cs-thumb" style="filter: brightness(0.85);"><span class="cut-frame">CU</span></div>
+                <div class="cs-body">
+                  <div class="cs-meta">CU · 1.7s · 이선 망설임</div>
+                  <div class="cs-actions">
+                    <button class="cs-act">↻</button>
+                    <button class="cs-act">✎</button>
+                    <button class="cs-act primary">＋ 채택</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== VIDEO (Phase 3) ========== -->
+    <section class="screen" data-screen="video">
+      <div class="scene-page">
+        <section class="phase-section locked" id="phase-video">
+          <header class="phase-header">
+            <div class="phase-num">3</div>
+            <div class="phase-text">
+              <h2 class="phase-title">영상</h2>
+              <p class="phase-sub">컷별 15초 클립 + 자동 가편 타임라인.</p>
+            </div>
+            <div class="phase-status-tag locked"><span class="dot"></span>대기 · 스토리보드 확정 후</div>
+          </header>
+
+          <div class="video-preview">
+            <div class="timeline-mock">
+              <div class="timeline-clip"><div class="clip-thumb"></div><span class="clip-meta">1 · 2.4s</span></div>
+              <div class="timeline-clip"><div class="clip-thumb" style="filter: brightness(1.1);"></div><span class="clip-meta">2 · 1.8s</span></div>
+              <div class="timeline-clip"><div class="clip-thumb" style="filter: brightness(0.9);"></div><span class="clip-meta">3 · 2.0s</span></div>
+              <div class="timeline-clip"><div class="clip-thumb" style="filter: hue-rotate(-10deg);"></div><span class="clip-meta">4 · 1.5s</span></div>
+              <div class="timeline-clip empty"><span>5</span></div>
+              <div class="timeline-clip empty"><span>6</span></div>
+              <div class="timeline-clip empty"><span>7+</span></div>
+            </div>
+            <p class="video-locked-note">스토리보드 시퀀스가 확정되면 컷별 영상 생성(Kling, Seedance)과 자동 가편이 여기서 시작됩니다.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ========== REFERENCES (대본·무드보드·룩북·자료) ========== -->
+    <section class="screen" data-screen="refs">
+      <div class="dash">
+        <div class="dash-header">
+          <h1 class="dash-title">참고자료</h1>
+        </div>
+
+        <div class="asset-tabs">
+          <a class="asset-tab active" data-refs-tab="scripts">대본 <span class="count-pill">8</span></a>
+          <a class="asset-tab" data-refs-tab="moodboards">무드보드 <span class="count-pill">4</span></a>
+          <a class="asset-tab" data-refs-tab="lookbook">룩북 <span class="count-pill">2</span></a>
+          <a class="asset-tab" data-refs-tab="links">자료 링크 <span class="count-pill">12</span></a>
+        </div>
+
+        <div class="asset-pane active" data-refs-pane="scripts">
+          <div class="ref-list">
+            <div class="ref-row">
+              <div class="ref-icon doc">📄</div>
+              <div class="ref-info">
+                <div class="ref-title">EP 03 · 병실 — 1차 대본</div>
+                <div class="ref-meta">14씬 · 32 페이지 · 김작가</div>
+              </div>
+              <div class="ref-stage chip-success">최종</div>
+              <div class="ref-updated">2026-05-08 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon doc">📄</div>
+              <div class="ref-info">
+                <div class="ref-title">EP 04 · 새벽 — 2차 수정</div>
+                <div class="ref-meta">12씬 · 28 페이지 · 김작가</div>
+              </div>
+              <div class="ref-stage chip-warn">검토중</div>
+              <div class="ref-updated">2026-05-11 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon doc">📄</div>
+              <div class="ref-info">
+                <div class="ref-title">EP 05 · 비 — 초안</div>
+                <div class="ref-meta">9씬 · 22 페이지 · 김작가</div>
+              </div>
+              <div class="ref-stage chip-default">초안</div>
+              <div class="ref-updated">2026-05-12 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon doc">📄</div>
+              <div class="ref-info">
+                <div class="ref-title">시리즈 시놉시스 v3</div>
+                <div class="ref-meta">11회차 개요 · 8 페이지</div>
+              </div>
+              <div class="ref-stage chip-success">최종</div>
+              <div class="ref-updated">2026-04-22 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon doc">📄</div>
+              <div class="ref-info">
+                <div class="ref-title">캐릭터 바이블</div>
+                <div class="ref-meta">주요 인물 12명 · 22 페이지</div>
+              </div>
+              <div class="ref-stage chip-success">최종</div>
+              <div class="ref-updated">2026-04-15 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row new-ref">
+              <div class="ref-icon doc empty">+</div>
+              <div class="ref-info">
+                <div class="ref-title" style="color: var(--ink-48);">대본 추가</div>
+                <div class="ref-meta">파일 드래그 또는 클릭</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="asset-pane" data-refs-pane="moodboards">
+          <div class="moodboard-grid">
+            <div class="mood-card">
+              <div class="mood-cover" style="background: linear-gradient(135deg, #2a3340, #3a2d2d);"></div>
+              <div class="mood-body">
+                <div class="mood-title">차가운 의료 공간</div>
+                <div class="mood-meta">참조 이미지 24장 · 시리즈 톤</div>
+              </div>
+            </div>
+            <div class="mood-card">
+              <div class="mood-cover" style="background: linear-gradient(135deg, #1a3548, #2a3340);"></div>
+              <div class="mood-body">
+                <div class="mood-title">새벽 빛 · 푸른 톤</div>
+                <div class="mood-meta">참조 이미지 18장 · EP 04</div>
+              </div>
+            </div>
+            <div class="mood-card">
+              <div class="mood-cover" style="background: linear-gradient(135deg, #3a2d2d, #6a4a3a);"></div>
+              <div class="mood-body">
+                <div class="mood-title">감정의 따뜻함</div>
+                <div class="mood-meta">참조 이미지 14장 · 회상 씬</div>
+              </div>
+            </div>
+            <div class="mood-card">
+              <div class="mood-cover" style="background: linear-gradient(135deg, #2a2d20, #3a3320);"></div>
+              <div class="mood-body">
+                <div class="mood-title">비 내리는 거리</div>
+                <div class="mood-meta">참조 이미지 9장 · EP 05</div>
+              </div>
+            </div>
+            <div class="mood-card new-mood">
+              <div class="mood-cover empty">+</div>
+              <div class="mood-body">
+                <div class="mood-title" style="color: var(--ink-48);">새 무드보드</div>
+                <div class="mood-meta">이미지 컬렉션</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="asset-pane" data-refs-pane="lookbook">
+          <div class="ref-list">
+            <div class="ref-row">
+              <div class="ref-icon doc">📖</div>
+              <div class="ref-info">
+                <div class="ref-title">시즌 2 룩북 · 의상</div>
+                <div class="ref-meta">캐릭터 12명 · 48 페이지</div>
+              </div>
+              <div class="ref-stage chip-success">최종</div>
+              <div class="ref-updated">2026-04-30 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon doc">📖</div>
+              <div class="ref-info">
+                <div class="ref-title">시즌 2 룩북 · 공간</div>
+                <div class="ref-meta">주요 배경 8 · 32 페이지</div>
+              </div>
+              <div class="ref-stage chip-success">최종</div>
+              <div class="ref-updated">2026-04-30 업데이트</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="asset-pane" data-refs-pane="links">
+          <div class="ref-list">
+            <div class="ref-row">
+              <div class="ref-icon link">🔗</div>
+              <div class="ref-info">
+                <div class="ref-title">Confluence — AI 드라마 제작 프로세스</div>
+                <div class="ref-meta">spoonradio.atlassian.net</div>
+              </div>
+              <div class="ref-updated">3일 전</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon link">🔗</div>
+              <div class="ref-info">
+                <div class="ref-title">Magnific · 업스케일 결과 모음</div>
+                <div class="ref-meta">magnific.com/project/biglu-s2</div>
+              </div>
+              <div class="ref-updated">1일 전</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row">
+              <div class="ref-icon link">🔗</div>
+              <div class="ref-info">
+                <div class="ref-title">중국 제작팀 워크플로 문서</div>
+                <div class="ref-meta">docs.google.com</div>
+              </div>
+              <div class="ref-updated">2주 전</div>
+              <button class="btn-ghost ref-action">열기 ›</button>
+            </div>
+            <div class="ref-row new-ref">
+              <div class="ref-icon link empty">+</div>
+              <div class="ref-info">
+                <div class="ref-title" style="color: var(--ink-48);">링크 추가</div>
+                <div class="ref-meta">URL 붙여넣기</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== ASSETS (캐릭터·배경·소품) ========== -->
+    <section class="screen" data-screen="asset">
+      <div class="dash">
+        <div class="dash-header">
+          <h1 class="dash-title">에셋</h1>
+        </div>
+
+        <div class="asset-tabs">
+          <a class="asset-tab active" data-asset-tab="characters">캐릭터 <span class="count-pill">12</span></a>
+          <a class="asset-tab" data-asset-tab="backgrounds">배경 <span class="count-pill">8</span></a>
+          <a class="asset-tab" data-asset-tab="props">소품 <span class="count-pill">23</span></a>
+        </div>
+
+        <div class="asset-pane active" data-asset-pane="characters">
+        <div class="characters-grid">
+          <div class="character-card" data-character="elena">
+            <div class="character-portrait">
+              <div class="item-presence">
+                <div class="av-mini director" title="김디렉터">김</div>
+              </div>
+            </div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>엘레나</div>
+              <div class="character-meta">14씬 사용 · 변주 3</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="leeson">
+            <div class="character-portrait" style="filter: hue-rotate(-30deg);">
+              <div class="item-presence">
+                <div class="av-mini pink" title="박크">박</div>
+              </div>
+            </div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>이선</div>
+              <div class="character-meta">9씬 사용 · 변주 2</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="sabrina">
+            <div class="character-portrait" style="filter: brightness(0.85);"></div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>사브리나</div>
+              <div class="character-meta">6씬 사용 · 변주 1</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="kim-md">
+            <div class="character-portrait" style="filter: brightness(1.1);"></div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>닥터킴</div>
+              <div class="character-meta">3씬 사용 · 변주 1</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="mom">
+            <div class="character-portrait" style="filter: hue-rotate(15deg) brightness(0.95);"></div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>엄마</div>
+              <div class="character-meta">4씬 사용 · 변주 2</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="dad">
+            <div class="character-portrait" style="filter: brightness(0.9);"></div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>아빠</div>
+              <div class="character-meta">2씬 사용</div>
+            </div>
+          </div>
+          <div class="character-card" data-character="lawyer">
+            <div class="character-portrait" style="filter: hue-rotate(-15deg);"></div>
+            <div class="character-body">
+              <div class="character-name"><span class="mention">@</span>변호사</div>
+              <div class="character-meta">3씬 사용</div>
+            </div>
+          </div>
+          <div class="character-card new-character" data-go="asset-character-new">
+            <div class="character-portrait empty">+</div>
+            <div class="character-body">
+              <div class="character-name" style="color: var(--ink-48);">새 캐릭터</div>
+              <div class="character-meta">위저드로 추가</div>
+            </div>
+          </div>
+        </div>
+        </div><!-- /pane characters -->
+
+        <div class="asset-pane" data-asset-pane="backgrounds">
+          <div class="bg-grid">
+            <div class="bg-card" data-bg="ward">
+              <div class="bg-thumb"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>병실</div>
+                <div class="bg-meta">8씬 사용 · 시간대 변주 2</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="lobby">
+              <div class="bg-thumb" style="filter: brightness(1.1);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>병원 로비</div>
+                <div class="bg-meta">5씬 사용</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="law-office">
+              <div class="bg-thumb" style="filter: hue-rotate(-20deg);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>변호사 사무실</div>
+                <div class="bg-meta">3씬 사용</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="apartment">
+              <div class="bg-thumb" style="filter: brightness(0.9);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>엘레나 아파트</div>
+                <div class="bg-meta">4씬 사용 · 시간대 변주 3</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="cafe">
+              <div class="bg-thumb" style="filter: hue-rotate(20deg) brightness(1.05);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>카페</div>
+                <div class="bg-meta">2씬 사용</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="rooftop">
+              <div class="bg-thumb" style="filter: brightness(0.75);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>옥상</div>
+                <div class="bg-meta">3씬 사용 · 밤/낮</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="parking">
+              <div class="bg-thumb" style="filter: brightness(0.8) hue-rotate(-10deg);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>지하주차장</div>
+                <div class="bg-meta">2씬 사용</div>
+              </div>
+            </div>
+            <div class="bg-card" data-bg="park">
+              <div class="bg-thumb" style="filter: hue-rotate(40deg) brightness(1.1);"></div>
+              <div class="bg-body">
+                <div class="bg-name"><span class="mention">@</span>공원</div>
+                <div class="bg-meta">1씬 사용</div>
+              </div>
+            </div>
+            <div class="character-card new-character" style="aspect-ratio: auto;">
+              <div class="bg-thumb empty">+</div>
+              <div class="bg-body">
+                <div class="bg-name" style="color: var(--ink-48);">새 배경</div>
+                <div class="bg-meta">위저드로 추가</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /pane backgrounds -->
+
+        <div class="asset-pane" data-asset-pane="props">
+          <div class="props-grid">
+            <div class="prop-card" data-prop="gown">
+              <div class="prop-thumb"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>의사 가운</div>
+                <div class="prop-meta">사용 5씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="briefcase">
+              <div class="prop-thumb" style="filter: brightness(0.9);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>서류 가방</div>
+                <div class="prop-meta">사용 4씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="phone">
+              <div class="prop-thumb" style="filter: brightness(1.1);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>스마트폰</div>
+                <div class="prop-meta">사용 12씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="wedding-ring">
+              <div class="prop-thumb" style="filter: hue-rotate(30deg) brightness(1.15);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>결혼 반지</div>
+                <div class="prop-meta">사용 3씬 · 상태 2 (착용/벗음)</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="iv-drip">
+              <div class="prop-thumb" style="filter: brightness(0.85);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>IV 수액대</div>
+                <div class="prop-meta">사용 6씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="chart">
+              <div class="prop-thumb" style="filter: hue-rotate(-15deg);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>진료 차트</div>
+                <div class="prop-meta">사용 4씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="umbrella">
+              <div class="prop-thumb" style="filter: brightness(0.7);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>우산</div>
+                <div class="prop-meta">사용 2씬</div>
+              </div>
+            </div>
+            <div class="prop-card" data-prop="key">
+              <div class="prop-thumb" style="filter: brightness(1.1) hue-rotate(15deg);"></div>
+              <div class="prop-body">
+                <div class="prop-name"><span class="mention">@</span>차 키</div>
+                <div class="prop-meta">사용 3씬</div>
+              </div>
+            </div>
+            <div class="character-card new-character" style="aspect-ratio: auto;">
+              <div class="prop-thumb empty">+</div>
+              <div class="prop-body">
+                <div class="prop-name" style="color: var(--ink-48);">새 소품</div>
+                <div class="prop-meta">위저드로 추가</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /pane props -->
+
+      </div>
+    </section>
+
+    <!-- ========== NEW CHARACTER WIZARD ========== -->
+    <section class="screen" data-screen="asset-character-new">
+      <div class="editor-wrap">
+        <span class="back-link" data-go="asset">에셋</span>
+
+        <div class="editor-header">
+          <div>
+            <div class="editor-eyebrow">새 캐릭터</div>
+            <h1 class="editor-title">캐릭터 추가</h1>
+          </div>
+        </div>
+
+        <div class="wizard-stepper">
+          <div class="wstep active"><span class="wstep-num">1</span><span class="wstep-label">기본 정보</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">2</span><span class="wstep-label">턴어라운드 생성</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">3</span><span class="wstep-label">캐논 채택</span></div>
+          <span class="wstep-line"></span>
+          <div class="wstep"><span class="wstep-num">4</span><span class="wstep-label">변주 (선택)</span></div>
+        </div>
+
+        <div class="editor-body">
+
+          <aside class="editor-left">
+            <div class="upload-zone large">
+              <span class="upload-plus">+</span>
+              <span class="upload-text">참조 이미지<br>드래그 또는 클릭</span>
+            </div>
+            <div class="editor-helper">실제 인물·다른 작품 캐릭터·컨셉 아트. 선택사항이지만 일관성 ↑.</div>
+          </aside>
+
+          <main class="editor-right">
+            <div class="editor-field">
+              <label class="editor-label">이름</label>
+              <input class="editor-input" placeholder="예: @엘레나">
+              <div class="editor-helper">@ 없이 이름만. 시스템이 @로 mention 처리.</div>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">묘사 (제작 프롬프트의 기반)</label>
+              <textarea class="editor-textarea" placeholder="예: 30대 동양인 여성, 검은 단발, 차가운 인상. 회색 셔츠와 슬랙스, 메디컬 드라마 변호사."></textarea>
+              <div class="editor-helper">구체적으로 — 나이·외형·체형·의상·분위기. 카메라·조명은 빼고 인물 본연만.</div>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">스타일 태그 (선택)</label>
+              <div class="tag-row">
+                <span class="tag">시네마틱</span>
+                <span class="tag">8K</span>
+                <span class="tag">차가운 톤</span>
+                <span class="tag plus">+ 태그</span>
+              </div>
+            </div>
+
+            <div class="editor-grid-2">
+              <div class="editor-field">
+                <label class="editor-label">모델</label>
+                <div class="editor-select">Seedream 5 ▾</div>
+              </div>
+              <div class="editor-field">
+                <label class="editor-label">IP-Adapter 가중치</label>
+                <input class="editor-input mono" value="0.7">
+              </div>
+            </div>
+          </main>
+
+        </div>
+
+        <div class="wizard-footer">
+          <button class="btn-ghost" data-go="asset" style="font-size: 14px; padding: 9px 18px;">취소</button>
+          <button class="btn-ghost" style="font-size: 14px; padding: 9px 18px; opacity: 0.4; pointer-events: none;">← 이전</button>
+          <button class="btn-primary" style="font-size: 14px; padding: 9px 18px;">다음 → 턴어라운드 생성</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CHARACTER DETAIL — @엘레나 ========== -->
+    <section class="screen" data-screen="asset-elena">
+      <div class="editor-wrap">
+        <span class="back-link" data-go="asset">에셋</span>
+
+        <div class="editor-header">
+          <div>
+            <div class="editor-eyebrow">캐릭터 편집</div>
+            <h1 class="editor-title"><span style="color: var(--primary);">@</span>엘레나</h1>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-ghost" style="font-size: 14px; padding: 9px 18px;">취소</button>
+            <button class="btn-primary" style="font-size: 14px; padding: 9px 18px;">저장</button>
+          </div>
+        </div>
+
+        <div class="editor-body">
+
+          <aside class="editor-left">
+            <div class="editor-portrait">
+              <div class="portrait-frame"></div>
+              <button class="btn-ghost portrait-replace" style="font-size: 13px; padding: 7px 14px;">이미지 교체</button>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">이름</label>
+              <input class="editor-input" value="엘레나">
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">참조 이미지</label>
+              <div class="upload-zone">
+                <span class="upload-plus">+</span>
+                <span class="upload-text">사진 드래그 또는 클릭</span>
+              </div>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">모델</label>
+              <div class="editor-select">Seedream 5 ▾</div>
+            </div>
+
+            <div class="editor-grid-2">
+              <div class="editor-field">
+                <label class="editor-label">시드</label>
+                <input class="editor-input mono" value="4821">
+              </div>
+              <div class="editor-field">
+                <label class="editor-label">IP-Adapter</label>
+                <input class="editor-input mono" value="0.7">
+              </div>
+            </div>
+          </aside>
+
+          <main class="editor-right">
+            <div class="editor-field">
+              <label class="editor-label">제작 프롬프트</label>
+              <textarea class="editor-textarea">30대 동양인 여성, 검은 단발, 차가운 인상. 회색 셔츠와 슬랙스, 메디컬 드라마 변호사. 차가운 색감, 8K 샤프 포커스, IP-Adapter 0.7로 일관성 유지.</textarea>
+              <div class="editor-helper">변경 시 해당 캐릭터가 사용된 14씬 모두에 영향. 변경 후 재생성 필요.</div>
+            </div>
+
+            <div class="editor-field">
+              <label class="editor-label">스타일 태그</label>
+              <div class="tag-row">
+                <span class="tag">시네마틱</span>
+                <span class="tag">8K</span>
+                <span class="tag">차가운 톤</span>
+                <span class="tag plus">+</span>
+              </div>
+            </div>
+
+            <div class="editor-section">
+              <div class="editor-section-head">
+                <h3 class="editor-section-title">에피소드 변주</h3>
+                <button class="btn-ghost" style="font-size: 13px; padding: 7px 14px;">+ 새 변주</button>
+              </div>
+              <p class="editor-section-desc">기준 캐릭터에서 무엇이 더해졌는지만 표시.</p>
+
+              <div class="variants-grid">
+                <div class="variant-card cur">
+                  <div class="variant-img" style="filter: brightness(0.95);">
+                    <span class="variant-ep">EP 03</span>
+                  </div>
+                  <div class="variant-name">의사 가운</div>
+                  <div class="variant-eps">EP 03, 04 · 4씬</div>
+                  <div class="variant-change">
+                    <span class="add">+ 흰 의사 가운</span><br>
+                    <span class="add">+ 머리 흐트러짐</span>
+                  </div>
+                </div>
+
+                <div class="variant-card">
+                  <div class="variant-img" style="filter: brightness(0.85) hue-rotate(-10deg);">
+                    <span class="variant-ep">EP 05</span>
+                  </div>
+                  <div class="variant-name">비 맞은 후</div>
+                  <div class="variant-eps">EP 05 · 1씬</div>
+                  <div class="variant-change">
+                    <span class="add">+ 젖은 머리</span><br>
+                    <span class="add">+ 마스카라 번짐</span>
+                  </div>
+                </div>
+
+                <div class="variant-card">
+                  <div class="variant-img" style="filter: brightness(0.7) grayscale(0.3);">
+                    <span class="variant-ep">EP 05</span>
+                  </div>
+                  <div class="variant-name">옷 찢어진</div>
+                  <div class="variant-eps">EP 05 · 1씬 · 상속 ‹ 비 맞은 후</div>
+                  <div class="variant-change">
+                    <span class="add">+ 셔츠 우측 어깨 찢어짐</span><br>
+                    <span class="add">+ 멍 자국</span>
+                  </div>
+                </div>
+
+                <div class="variant-card empty">
+                  <div class="plus">+</div>
+                  <div class="label">새 변주</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-section danger">
+              <h3 class="editor-section-title" style="color: var(--ink);">위험 영역</h3>
+              <p class="editor-section-desc">캐릭터를 삭제하면 14씬의 reference가 해제됩니다. 되돌릴 수 없습니다.</p>
+              <button class="btn-ghost" style="font-size: 13px; padding: 8px 16px; color: #c66; border-color: #c66;">캐릭터 삭제</button>
+            </div>
+          </main>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STORYBOARD ========== -->
+
+    <section class="screen" data-screen="settings" data-blueprint>
+      <div class="blueprint-wrap">
+        <div class="blueprint-tag">아직 디자인되지 않음</div>
+        <h2>설정</h2>
+        <p class="lede">프로젝트 설정, 모델 선호도, 역할 권한, 빌링.</p>
+        <div class="blueprint-detail">
+          <h4>고려할 항목</h4>
+          <ul>
+            <li>워크스페이스 단위 모델 선호도 — 기본은 Seedream과 NanoBanana</li>
+            <li>디렉터 / 크리에이터 역할 권한</li>
+            <li>Phase 2 — 외부 공유 링크, 콘텐츠팀, 클라이언트</li>
+            <li>Phase 4 — 결제와 멀티테넌시 게이트</li>
+          </ul>
+        </div>
+        <div class="blueprint-cta-row">
+          <button class="btn-primary" onclick="proposeScreen('settings')">제안 받기</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-top">
+    <span class="lb-title">Shot 02 비교</span>
+    <div class="lb-actions">
+      <span class="lb-hint">A · B · C로 포커스 전환</span>
+      <span class="lb-close" id="lb-close">닫기 ✕</span>
+    </div>
+  </div>
+  <div class="lb-body">
+    <div class="lb-pane cur">
+      <div class="lb-image"></div>
+      <div class="lb-meta"><span>A · Shot 02</span><span>Seedream 5</span><span>seed 4821</span></div>
+    </div>
+    <div class="lb-pane">
+      <div class="lb-image" style="filter: brightness(0.92);"></div>
+      <div class="lb-meta"><span>B · Shot 04</span><span>Seedream 5</span><span>seed 4822</span></div>
+    </div>
+    <div class="lb-pane">
+      <div class="lb-image" style="filter: hue-rotate(-12deg);"></div>
+      <div class="lb-meta"><span>C · Shot 07</span><span>NanoBanana 2</span><span>seed 9933</span></div>
+    </div>
+  </div>
+  <div class="lb-bottom">
+    <button class="btn-ghost">반려</button>
+    <button class="btn-primary">마스터샷으로 채택</button>
+  </div>
+</div>
+
+<!-- Character prompt modal -->
+<div class="prompt-modal" id="prompt-modal">
+  <div class="pm-card">
+    <div class="pm-head">
+      <h3>제작 프롬프트</h3>
+      <span class="pm-close" id="pm-close">닫기 ✕</span>
+    </div>
+    <div class="pm-character">
+      <div class="pm-portrait" id="pm-portrait"></div>
+      <div class="pm-info">
+        <div class="pm-name" id="pm-name"><span class="mention">@</span>엘레나</div>
+        <div class="pm-meta" id="pm-meta">14씬 사용 · 변주 3 · seed 4821</div>
+      </div>
+    </div>
+    <div class="pm-section-label">프롬프트</div>
+    <div class="pm-prompt" id="pm-prompt">"30대 동양인 여성, 검은 단발, 차가운 인상. 회색 셔츠와 슬랙스, 메디컬 드라마 변호사. 차가운 색감, 8K, IP-Adapter 0.7"</div>
+    <div class="pm-tech" id="pm-tech">
+      <div><span class="label">모델</span><span class="val">Seedream 5</span></div>
+      <div><span class="label">시드</span><span class="val">4821</span></div>
+      <div><span class="label">IP-Adapter</span><span class="val">0.7</span></div>
+    </div>
+    <div class="pm-actions">
+      <button class="btn-ghost" id="pm-copy" style="font-size: 14px; padding: 9px 18px;">프롬프트 복사</button>
+      <button class="btn-primary" id="pm-edit" style="font-size: 14px; padding: 9px 18px;">에디터 열기 ›</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== Direct WS to visual-companion server (helper.js not injected on /files/) ======
+let _ws = null;
+let _wsQueue = [];
+function _wsConnect() {
+  try {
+    _ws = new WebSocket('ws://' + location.host);
+    _ws.onopen = () => { _wsQueue.forEach(e => _ws.send(JSON.stringify(e))); _wsQueue = []; };
+    _ws.onclose = () => setTimeout(_wsConnect, 1000);
+    _ws.onmessage = (m) => {
+      try { const d = JSON.parse(m.data); if (d.type === 'reload') location.reload(); } catch (e) {}
+    };
+  } catch (e) {}
+}
+_wsConnect();
+function reportToClaude(event) {
+  event.timestamp = Date.now();
+  if (_ws && _ws.readyState === WebSocket.OPEN) _ws.send(JSON.stringify(event));
+  else _wsQueue.push(event);
+}
+
+const channel = new BroadcastChannel('filmmaker');
+channel.addEventListener('message', e => {
+  if (e.data.type === 'navigate' && e.data.screen) location.hash = '#' + e.data.screen;
+});
+function broadcastScreen() {
+  const hash = (location.hash || '#dashboard').slice(1);
+  channel.postMessage({ type: 'screen-changed', screen: hash });
+  reportToClaude({ type: 'screen-viewed', screen: hash, source: 'product' });
+}
+function proposeScreen(name) {
+  channel.postMessage({ type: 'focus-proposal', screen: name });
+  toast('ClaudeDesign 탭에서 제안을 확인하세요');
+}
+
+const SCENES = {
+  s09: { name: 'Scene 09 — 입원', count: '8 / 8', cards: [{id:'01',state:'approved'},{id:'02',state:'master'},{id:'03',state:'approved'},{id:'04',state:'rejected'}] },
+  s10: { name: 'Scene 10 — 대치', count: '14 / 14', cards: [{id:'01',state:'master'},{id:'02',state:'approved'},{id:'03',state:'rejected'},{id:'04',state:'default'},{id:'05',state:'rejected'}] },
+  s11: { name: 'Scene 11 — 선언', count: '9 / 9', cards: [{id:'01',state:'default'},{id:'02',state:'master'},{id:'03',state:'approved'}] },
+  s12: { name: 'Scene 12 — 병실 충돌', count: '11 / 24', cards: [{id:'01',state:'default'},{id:'02',state:'master'},{id:'03',state:'approved'},{id:'04',state:'default'},{id:'05',state:'rejected'},{id:'06',state:'default'},{id:'07',state:'default'}] },
+  s13: { name: 'Scene 13 — 엄마 등장', count: '0 / 0', cards: [] },
+  s14: { name: 'Scene 14 — 결심', count: '0 / 0', cards: [] },
+  s15: { name: 'Scene 15', count: '0 / 0', cards: [] },
+  s16: { name: 'Scene 16', count: '0 / 0', cards: [] }
+};
+
+const COMMENTS = {
+  '02': [{ who: '김디렉터', clr: 'primary', when: '2분 전', msg: '눈빛 더 차갑게, 줌인 살짝' }],
+  '04': [{ who: '김디렉터', clr: 'primary', when: '5분 전', msg: '색감 더 차갑게 가자' }]
+};
+
+let currentScene = 's12';
+let currentCommentTarget = '02';
+
+const PROJECT_SCOPED = new Set(['dashboard', 'episodes', 'episode-ep03', 'board', 'asset', 'asset-elena', 'asset-character-new', 'storyboard', 'video', 'script-cuts', 'refs']);
+const SCENE_SCOPED = new Set(['board', 'storyboard', 'video', 'script-cuts']);
+
+// Map detail/stage views to project-tab for sub-nav active highlight
+const STAGE_TO_PROJECT_TAB = {
+  board: 'episodes', storyboard: 'episodes', video: 'episodes',
+  'episode-ep03': 'episodes', 'script-cuts': 'episodes',
+  'asset-elena': 'asset', 'asset-character-new': 'asset'
+};
+
+// When on a sub-tool within scene stage, highlight the parent stage tab
+const SCENE_TAB_PARENT = { 'script-cuts': 'storyboard' };
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name));
+
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.remove('active'));
+  const projectTab = STAGE_TO_PROJECT_TAB[name] || name;
+  document.querySelectorAll(`[data-nav="${projectTab}"]`).forEach(a => a.classList.add('active'));
+  const stageTab = SCENE_TAB_PARENT[name] || name;
+  document.querySelectorAll(`.sc-stages [data-nav="${stageTab}"]`).forEach(a => a.classList.add('active'));
+
+  const subNav = document.getElementById('sub-nav');
+  if (subNav) subNav.style.display = PROJECT_SCOPED.has(name) ? 'flex' : 'none';
+
+  const sceneCtx = document.getElementById('scene-context');
+  if (sceneCtx) sceneCtx.classList.toggle('show', SCENE_SCOPED.has(name));
+
+  const avStack = document.getElementById('av-stack');
+  if (avStack) avStack.style.display = SCENE_SCOPED.has(name) ? 'flex' : 'none';
+
+  // Reset scroll for each navigated screen
+  const screenEl = document.querySelector(`.screen[data-screen="${name}"]`);
+  if (screenEl) screenEl.scrollTop = 0;
+}
+function route() {
+  const hash = (location.hash || '#dashboard').slice(1);
+  const screens = [...document.querySelectorAll('.screen')].map(s => s.dataset.screen);
+  showScreen(screens.includes(hash) ? hash : 'dashboard');
+  if (hash === 'board') renderBoard();
+  broadcastScreen();
+}
+window.addEventListener('hashchange', route);
+
+document.querySelectorAll('[data-nav]').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); location.hash = '#' + a.dataset.nav; });
+});
+document.body.addEventListener('click', e => {
+  if (e.target.closest('[data-star]')) return; // let star handler take over
+  const go = e.target.closest('[data-go]');
+  if (go) { e.preventDefault(); location.hash = '#' + go.dataset.go; }
+});
+
+// ====== Star (priority) toggle on project cards ======
+document.querySelectorAll('[data-star]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const card = btn.closest('.project-card');
+    if (!card) return;
+    const grid = card.parentElement;
+    if (card.classList.contains('starred')) {
+      card.classList.remove('starred');
+      btn.textContent = '☆';
+      btn.title = '우선순위 올리기';
+      // move to original-ish position: just append to end of grid
+      grid.appendChild(card);
+    } else {
+      card.classList.add('starred');
+      btn.textContent = '★';
+      btn.title = '우선순위에서 내리기';
+      // move to front (after other starred cards)
+      const firstUnstarred = [...grid.children].find(c => !c.classList.contains('starred') && c !== card);
+      if (firstUnstarred) grid.insertBefore(card, firstUnstarred);
+      else grid.prepend(card);
+    }
+    reportToClaude({ type: 'project-starred', pid: card.dataset.pid, starred: card.classList.contains('starred') });
+  });
+});
+
+// ========== BOARD (Phase 1 master shot grid) ==========
+const IMG_FILTERS = ['', 'brightness(1.1)', 'hue-rotate(-10deg)', 'brightness(0.9)', 'brightness(0.85)', 'hue-rotate(15deg)', 'brightness(1.05)', 'brightness(0.95)'];
+
+function renderBoard() {
+  const scene = SCENES[currentScene];
+  const sceneNameEl = document.getElementById('scene-name');
+  if (sceneNameEl) sceneNameEl.textContent = scene.name;
+  const inner = document.getElementById('canvas-inner');
+  if (!inner) return;
+  inner.querySelectorAll('.shot-card, .cursor').forEach(el => el.remove());
+
+  scene.cards.forEach((card, i) => {
+    const el = document.createElement('div');
+    el.className = 'shot-card appearing';
+    if (card.state !== 'default') el.classList.add(card.state);
+    el.dataset.id = card.id;
+    const filter = IMG_FILTERS[i % IMG_FILTERS.length];
+    const titleNum = `Shot ${card.id}`;
+    const starHTML = card.state === 'master' ? '<span class="star">★</span>' : '';
+    const checkHTML = card.state === 'approved' ? '<span class="check">✓</span>' : '';
+    const presenceHTML = (currentScene === 's12' && card.state === 'master')
+      ? '<div class="item-presence"><div class="av-mini director">김</div><div class="av-mini pink">박</div></div>'
+      : '';
+    el.innerHTML = `
+      <div class="card-toolbar">
+        <div class="ct-btn comment">코멘트</div>
+        <div class="ct-btn reject">반려</div>
+        <div class="ct-btn primary approve">승인</div>
+      </div>
+      <div class="img" style="filter:${filter};">${presenceHTML}</div>
+      <div class="meta-row">${starHTML}<span class="title">${titleNum}</span>${checkHTML}</div>
+    `;
+    inner.appendChild(el);
+  });
+
+  // cursors removed — incompatible with grid layout; presence shown on card instead
+  if (false && currentScene === 's12') {
+    const c1 = document.createElement('div');
+    c1.className = 'cursor';
+    c1.style.top = '160px';
+    c1.style.left = '350px';
+    c1.innerHTML = `<svg width="14" height="18" viewBox="0 0 14 18"><path fill="#0066cc" stroke="#fff" stroke-width=".7" d="M2 1 L2 15 L6 11 L8.5 16 L10.5 15 L8 10 L13 10 Z"/></svg><span class="name" style="background:#0066cc;">김디렉터</span>`;
+    inner.appendChild(c1);
+
+    const c2 = document.createElement('div');
+    c2.className = 'cursor';
+    c2.style.top = '260px';
+    c2.style.left = '560px';
+    c2.innerHTML = `<svg width="14" height="18" viewBox="0 0 14 18"><path fill="#c66" stroke="#fff" stroke-width=".7" d="M2 1 L2 15 L6 11 L8.5 16 L10.5 15 L8 10 L13 10 Z"/></svg><span class="name" style="background:#c66;">박크</span>`;
+    inner.appendChild(c2);
+  }
+  bindShotCardHandlers();
+}
+
+function bindShotCardHandlers() {
+  document.querySelectorAll('.shot-card').forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector('.approve').addEventListener('click', e => {
+      e.stopPropagation();
+      card.classList.remove('rejected', 'master');
+      card.classList.add('approved');
+      const sc = SCENES[currentScene].cards.find(c => c.id === id);
+      if (sc) sc.state = 'approved';
+      const mr = card.querySelector('.meta-row');
+      if (!mr.querySelector('.check')) mr.insertAdjacentHTML('beforeend', '<span class="check">✓</span>');
+      toast(`Shot ${id} 승인됨`);
+    });
+    card.querySelector('.reject').addEventListener('click', e => {
+      e.stopPropagation();
+      card.classList.remove('approved', 'master');
+      card.classList.add('rejected');
+      const sc = SCENES[currentScene].cards.find(c => c.id === id);
+      if (sc) sc.state = 'rejected';
+      const check = card.querySelector('.check');
+      if (check) check.remove();
+      toast(`Shot ${id} 반려됨`);
+    });
+    card.querySelector('.comment').addEventListener('click', e => {
+      e.stopPropagation();
+      openComments(id);
+    });
+    card.addEventListener('click', e => {
+      if (e.target.closest('.card-toolbar')) return;
+      if (card.classList.contains('master') || e.shiftKey) openLightbox();
+    });
+  });
+}
+
+// ========== DOCK ==========
+const dockInput = document.getElementById('dock-input');
+const dockBtn = document.getElementById('dock-btn');
+dockBtn.addEventListener('click', generate);
+dockInput.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate(); });
+let nextCardId = 8;
+function generate() {
+  toast('생성 시작 · Seedream 4장');
+  dockInput.value = '';
+  dockBtn.disabled = true;
+  const inner = document.getElementById('canvas-inner');
+  const baseY = 360;
+  const placeholders = [];
+  for (let i = 0; i < 4; i++) {
+    const el = document.createElement('div');
+    el.className = 'shot-card generating appearing';
+    el.style.top = baseY + 'px';
+    el.style.left = (40 + i * 200) + 'px';
+    el.innerHTML = `<div class="img"></div><div class="meta-row"><span class="title">${10 + i}초 · 생성 중</span></div>`;
+    inner.appendChild(el);
+    placeholders.push(el);
+  }
+  let completed = 0;
+  const fillInterval = setInterval(() => {
+    if (completed >= 4) {
+      clearInterval(fillInterval);
+      dockBtn.disabled = false;
+      toast('생성 완료 · 4장 도착');
+      return;
+    }
+    const el = placeholders[completed];
+    const id = String(nextCardId++).padStart(2, '0');
+    el.className = 'shot-card appearing';
+    el.dataset.id = id;
+    el.innerHTML = `
+      <div class="card-toolbar">
+        <div class="ct-btn comment">코멘트</div>
+        <div class="ct-btn reject">반려</div>
+        <div class="ct-btn primary approve">승인</div>
+      </div>
+      <div class="img" style="filter: ${IMG_FILTERS[(nextCardId - 1) % IMG_FILTERS.length]};"></div>
+      <div class="meta-row"><span class="title">Shot ${id}</span></div>
+    `;
+    SCENES[currentScene].cards.push({ id, state: 'default' });
+    completed++;
+    bindShotCardHandlers();
+  }, 800);
+}
+
+// ========== DRAWER ==========
+const drawer = document.getElementById('drawer');
+document.getElementById('drawer-close').addEventListener('click', () => drawer.classList.remove('open'));
+document.getElementById('open-drawer').addEventListener('click', () => drawer.classList.toggle('open'));
+
+// ========== COMMENTS ==========
+const comments = document.getElementById('comments');
+const commentsList = document.getElementById('comments-list');
+const comTargetLabel = document.getElementById('com-target-label');
+const comTextarea = document.getElementById('com-textarea');
+document.getElementById('com-close').addEventListener('click', () => comments.classList.remove('open'));
+
+function openComments(cardId) {
+  currentCommentTarget = cardId;
+  comTargetLabel.textContent = 'Shot ' + cardId;
+  renderComments();
+  comments.classList.add('open');
+  comTextarea.focus();
+}
+function renderComments() {
+  const list = COMMENTS[currentCommentTarget] || [];
+  if (list.length === 0) {
+    commentsList.innerHTML = '<div style="color: var(--ink-48); font-size: 14px; padding: 14px 0;">아직 코멘트가 없습니다.</div>';
+    return;
+  }
+  commentsList.innerHTML = list.map(c => `
+    <div class="com-item">
+      <div class="com-meta">
+        <span class="com-avatar" style="background: var(--primary);">${c.who[0]}</span>
+        <span class="com-who">${c.who}</span>
+        <span>·</span>
+        <span>${c.when}</span>
+      </div>
+      <div class="com-msg">"${c.msg}"</div>
+      <div class="com-actions">
+        <span class="com-action" data-comment="${c.msg}">이 코멘트로 재생성</span>
+        <span class="com-action muted">답글</span>
+        <span class="com-action muted">해결</span>
+      </div>
+    </div>`).join('');
+  commentsList.querySelectorAll('.com-action[data-comment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dockInput.value = `@엘레나의 클로즈업, ${btn.dataset.comment}, 시드 고정`;
+      comments.classList.remove('open');
+      dockInput.focus();
+      toast('프롬프트에 추가됨');
+    });
+  });
+}
+document.getElementById('com-send').addEventListener('click', () => {
+  const text = comTextarea.value.trim();
+  if (!text) return;
+  if (!COMMENTS[currentCommentTarget]) COMMENTS[currentCommentTarget] = [];
+  COMMENTS[currentCommentTarget].push({ who: '나', clr: 'primary', when: '방금', msg: text });
+  comTextarea.value = '';
+  renderComments();
+  toast('코멘트 등록됨');
+});
+
+// ========== LIGHTBOX ==========
+const lightbox = document.getElementById('lightbox');
+document.getElementById('lb-close').addEventListener('click', () => lightbox.classList.remove('open'));
+function openLightbox() { lightbox.classList.add('open'); }
+document.querySelectorAll('.lb-pane').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.lb-pane').forEach(o => o.classList.remove('cur'));
+    p.classList.add('cur');
+  });
+});
+
+// ========== SCRIPT → CUTS (accept toggle) ==========
+document.querySelectorAll('.cut-suggest .cs-act.primary').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const card = btn.closest('.cut-suggest');
+    if (!card) return;
+    card.classList.toggle('accepted');
+    const isAccepted = card.classList.contains('accepted');
+    btn.textContent = isAccepted ? '✓ 채택됨' : '＋ 채택';
+    // Update count
+    const total = document.querySelectorAll('.cut-suggest').length;
+    const accepted = document.querySelectorAll('.cut-suggest.accepted').length;
+    const counter = document.querySelector('.sc-cuts-count');
+    if (counter) counter.innerHTML = `채택 <strong>${accepted}</strong> / ${total}`;
+  });
+});
+
+// ========== ASSET SUB-TABS (캐릭터 / 배경 / 소품) ==========
+document.querySelectorAll('[data-asset-tab]').forEach(tab => {
+  tab.addEventListener('click', e => {
+    e.preventDefault();
+    const target = tab.dataset.assetTab;
+    document.querySelectorAll('[data-asset-tab]').forEach(t => t.classList.toggle('active', t.dataset.assetTab === target));
+    document.querySelectorAll('[data-asset-pane]').forEach(p => p.classList.toggle('active', p.dataset.assetPane === target));
+  });
+});
+
+// ========== REFERENCES SUB-TABS (대본 / 무드보드 / 룩북 / 링크) ==========
+document.querySelectorAll('[data-refs-tab]').forEach(tab => {
+  tab.addEventListener('click', e => {
+    e.preventDefault();
+    const target = tab.dataset.refsTab;
+    document.querySelectorAll('[data-refs-tab]').forEach(t => t.classList.toggle('active', t.dataset.refsTab === target));
+    document.querySelectorAll('[data-refs-pane]').forEach(p => p.classList.toggle('active', p.dataset.refsPane === target));
+  });
+});
+
+// ========== CHARACTER PROMPT MODAL ==========
+const CHARACTERS = {
+  elena: {
+    name: '엘레나',
+    meta: '14씬 사용 · 변주 3',
+    prompt: '30대 동양인 여성, 검은 단발, 차가운 인상. 회색 셔츠와 슬랙스, 메디컬 드라마 변호사. 차가운 색감, 8K 샤프 포커스, IP-Adapter 0.7로 일관성 유지.',
+    model: 'Seedream 5',
+    seed: 4821,
+    ipa: 0.7,
+    filter: '',
+    editRoute: 'asset-elena'
+  },
+  leeson: {
+    name: '이선',
+    meta: '9씬 사용 · 변주 2',
+    prompt: '30대 후반 남성, 짙은 머리, 단호하고 잘 다듬어진 인상. 어두운 정장. 약간 따뜻한 그레이 톤, 8K, 실내 차가운 조명.',
+    model: 'Seedream 5',
+    seed: 5103,
+    ipa: 0.7,
+    filter: 'hue-rotate(-30deg)',
+    editRoute: 'asset-elena'
+  },
+  sabrina: {
+    name: '사브리나',
+    meta: '6씬 사용 · 변주 1',
+    prompt: '20대 후반 여성, 긴 곱슬머리, 부드럽지만 흔들리는 인상. 베이지 니트와 청바지. 따뜻한 톤이지만 차가운 의료 공간에서 외로운 분위기.',
+    model: 'NanoBanana Pro',
+    seed: 7218,
+    ipa: 0.65,
+    filter: 'brightness(0.85)',
+    editRoute: 'asset-elena'
+  },
+  'kim-md': {
+    name: '닥터킴',
+    meta: '3씬 사용 · 변주 1',
+    prompt: '40대 남성, 의사 가운, 안경, 차분한 표정. 짙은 회색 머리. 미래적 의료 공간에 어울리는 신뢰감 있는 분위기.',
+    model: 'Seedream 5',
+    seed: 3344,
+    ipa: 0.7,
+    filter: 'brightness(1.1)',
+    editRoute: 'asset-elena'
+  },
+  mom: {
+    name: '엄마',
+    meta: '4씬 사용 · 변주 2',
+    prompt: '60대 동양인 여성, 단정한 단발, 따뜻한 인상. 베이지 카디건, 진주 귀걸이.',
+    model: 'Seedream 5',
+    seed: 6601,
+    ipa: 0.7,
+    filter: 'hue-rotate(15deg) brightness(0.95)',
+    editRoute: 'asset-elena'
+  },
+  dad: {
+    name: '아빠',
+    meta: '2씬 사용',
+    prompt: '60대 동양인 남성, 짧은 회색 머리, 점잖은 분위기. 어두운 카디건.',
+    model: 'Seedream 5',
+    seed: 6702,
+    ipa: 0.65,
+    filter: 'brightness(0.9)',
+    editRoute: 'asset-elena'
+  },
+  lawyer: {
+    name: '변호사',
+    meta: '3씬 사용',
+    prompt: '40대 남성, 검은 정장, 안경, 차가운 표정. 변호사 사무실 배경에 어울리는 분위기.',
+    model: 'NanoBanana Pro',
+    seed: 9001,
+    ipa: 0.7,
+    filter: 'hue-rotate(-15deg)',
+    editRoute: 'asset-elena'
+  }
+};
+
+const promptModal = document.getElementById('prompt-modal');
+const pmPortrait = document.getElementById('pm-portrait');
+const pmName = document.getElementById('pm-name');
+const pmMeta = document.getElementById('pm-meta');
+const pmPrompt = document.getElementById('pm-prompt');
+const pmTech = document.getElementById('pm-tech');
+let pmCurrentEditRoute = 'asset-elena';
+
+function openPromptModal(charKey) {
+  const c = CHARACTERS[charKey] || CHARACTERS.elena;
+  pmPortrait.style.filter = c.filter || '';
+  pmName.innerHTML = `<span class="mention">@</span>${c.name}`;
+  pmMeta.textContent = `${c.meta} · seed ${c.seed}`;
+  pmPrompt.textContent = `"${c.prompt}"`;
+  pmTech.innerHTML = `
+    <div><span class="label">모델</span><span class="val">${c.model}</span></div>
+    <div><span class="label">시드</span><span class="val">${c.seed}</span></div>
+    <div><span class="label">IP-Adapter</span><span class="val">${c.ipa}</span></div>
+  `;
+  pmCurrentEditRoute = c.editRoute;
+  promptModal.classList.add('open');
+}
+function closePromptModal() { promptModal.classList.remove('open'); }
+
+document.getElementById('pm-close').addEventListener('click', closePromptModal);
+document.getElementById('pm-edit').addEventListener('click', () => {
+  closePromptModal();
+  location.hash = '#' + pmCurrentEditRoute;
+});
+document.getElementById('pm-copy').addEventListener('click', () => {
+  navigator.clipboard?.writeText(pmPrompt.textContent.replace(/^"|"$/g, ''));
+  toast('프롬프트 복사됨');
+});
+promptModal.addEventListener('click', e => { if (e.target === promptModal) closePromptModal(); });
+
+document.querySelectorAll('[data-character]').forEach(card => {
+  card.addEventListener('click', e => {
+    if (e.target.closest('[data-go]')) return;
+    openPromptModal(card.dataset.character);
+  });
+});
+
+// ========== SCENE STRIP ==========
+document.querySelectorAll('.scene-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const id = item.dataset.scene;
+    if (!SCENES[id]) return;
+    currentScene = id;
+    document.querySelectorAll('.scene-thumb').forEach(t => t.classList.remove('cur'));
+    document.querySelectorAll('.scene-label').forEach(l => l.classList.remove('cur'));
+    item.querySelector('.scene-thumb').classList.add('cur');
+    item.querySelector('.scene-label').classList.add('cur');
+    renderBoard();
+    toast(SCENES[id].name);
+  });
+});
+
+// ========== TOAST ==========
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (promptModal.classList.contains('open')) closePromptModal();
+    else if (lightbox.classList.contains('open')) lightbox.classList.remove('open');
+    else if (drawer.classList.contains('open')) drawer.classList.remove('open');
+    else if (comments.classList.contains('open')) comments.classList.remove('open');
+  }
+  if (e.key === 'l' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); drawer.classList.toggle('open'); }
+});
+
+window.addEventListener('DOMContentLoaded', route);
+route();
+</script>
+</body>
+</html>

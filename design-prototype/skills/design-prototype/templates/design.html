@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ClaudeDesign — FilmMaker</title>
+<style>
+  :root {
+    --primary: #0066cc;
+    --primary-focus: #0071e3;
+    --ink: #1d1d1f;
+    --ink-80: #333333;
+    --ink-48: #7a7a7a;
+    --hairline: #e0e0e0;
+    --divider-soft: #f0f0f0;
+    --canvas: #ffffff;
+    --canvas-parchment: #f5f5f7;
+    --surface-pearl: #fafafc;
+    --black: #000000;
+
+    --r-sm: 8px;
+    --r-md: 11px;
+    --r-lg: 18px;
+    --r-pill: 9999px;
+
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 17px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+
+    --font-display: 'SF Pro Display', system-ui, -apple-system, 'Inter', sans-serif;
+    --font-text: 'SF Pro Text', system-ui, -apple-system, 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--canvas-parchment);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+    overflow-y: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--black);
+    color: var(--canvas);
+    height: 44px;
+    padding: 0 var(--s-lg);
+    display: flex; align-items: center; gap: var(--s-md);
+    font-family: var(--font-text);
+    font-size: 12px;
+    letter-spacing: -0.12px;
+  }
+  .topbar .logo {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.374px;
+  }
+  .topbar .crumb { opacity: 0.7; }
+  .topbar .right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+  .pulse { display: flex; align-items: center; gap: 6px; font-size: 11px; opacity: 0.9; }
+  .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 0 0 #4ade80;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: var(--s-xxl) var(--s-lg); }
+
+  .hero { padding: 0 0 var(--s-xl); border-bottom: 1px solid var(--divider-soft); margin-bottom: var(--s-xl); }
+  .hero .eyebrow {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: -0.224px;
+    margin-bottom: var(--s-xs);
+    text-transform: uppercase;
+  }
+  .hero h1 { font-family: var(--font-display); font-size: 40px; font-weight: 600; line-height: 1.1; margin-bottom: var(--s-sm); }
+  .hero .lede { font-family: var(--font-display); font-size: 21px; line-height: 1.5; color: var(--ink-80); }
+
+  .section { margin-bottom: var(--s-xxl); }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.14;
+    margin-bottom: var(--s-md);
+    display: flex; align-items: baseline; gap: var(--s-sm);
+  }
+  .section-title .num { font-size: 14px; font-weight: 600; color: var(--primary); letter-spacing: -0.224px; }
+  .section-title .meta { margin-left: auto; font-family: var(--font-text); font-size: 14px; font-weight: 400; color: var(--ink-48); letter-spacing: -0.224px; }
+
+  .focus-card { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-xl); display: flex; gap: var(--s-lg); align-items: center; }
+  .focus-info { flex: 1; }
+  .focus-screen { font-family: var(--font-text); font-size: 14px; color: var(--primary); font-weight: 600; letter-spacing: -0.224px; text-transform: uppercase; margin-bottom: var(--s-xs); }
+  .focus-name { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1.14; margin-bottom: var(--s-xs); }
+  .focus-desc { font-family: var(--font-text); font-size: 17px; color: var(--ink-80); line-height: 1.47; letter-spacing: -0.374px; }
+  .focus-cta {
+    background: var(--primary); color: var(--canvas);
+    font-family: var(--font-text); font-size: 17px;
+    padding: 11px 22px; border-radius: var(--r-pill);
+    cursor: pointer; border: none; transition: transform 0.1s;
+  }
+  .focus-cta:active { transform: scale(0.95); }
+
+  .proposal { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-lg); margin-bottom: var(--s-sm); }
+  .proposal-head { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-sm); }
+  .proposal-status {
+    font-family: var(--font-text); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: var(--r-pill);
+  }
+  .proposal-status.applied { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+  .proposal-status.new { background: rgba(0, 0, 0, 0.06); color: var(--ink-80); }
+  .proposal-file { font-family: var(--font-text); font-size: 12px; color: var(--ink-48); letter-spacing: -0.12px; }
+  .proposal-when { margin-left: auto; font-family: var(--font-text); font-size: 12px; color: var(--ink-48); letter-spacing: -0.12px; }
+  .proposal-title { font-family: var(--font-text); font-size: 17px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; margin-bottom: var(--s-xs); }
+  .proposal-why { font-family: var(--font-text); font-size: 14px; color: var(--ink-80); line-height: 1.43; letter-spacing: -0.224px; }
+  .proposal-diff {
+    margin-top: var(--s-sm);
+    background: var(--canvas-parchment);
+    border-radius: var(--r-sm);
+    padding: var(--s-sm) var(--s-md);
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink-80);
+    line-height: 1.6;
+  }
+  .proposal-diff .ctx { color: var(--ink-48); }
+  .proposal-diff .add { color: var(--primary); }
+  .proposal-diff .rem { color: #c66; text-decoration: line-through; }
+
+  .road-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-md); }
+  .road-item { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-lg); cursor: pointer; transition: transform 0.15s; }
+  .road-item:hover { transform: translateY(-2px); }
+  .road-head { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-xs); }
+  .road-name { font-family: var(--font-text); font-size: 17px; font-weight: 600; letter-spacing: -0.374px; }
+  .road-stage {
+    margin-left: auto;
+    font-family: var(--font-text); font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: var(--r-pill);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .road-stage.done { background: rgba(0, 102, 204, 0.1); color: var(--primary); }
+  .road-stage.planned { background: rgba(0, 0, 0, 0.06); color: var(--ink-80); }
+  .road-stage.blank { background: rgba(0, 0, 0, 0.04); color: var(--ink-48); }
+  .road-desc { font-family: var(--font-text); font-size: 14px; color: var(--ink-80); line-height: 1.43; letter-spacing: -0.224px; }
+
+  .tokens-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-sm); margin-bottom: var(--s-md); }
+  .token-card { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-md); display: flex; align-items: center; gap: var(--s-sm); }
+  .token-swatch { width: 36px; height: 36px; border-radius: var(--r-sm); flex-shrink: 0; }
+  .token-name { font-family: var(--font-text); font-size: 14px; font-weight: 600; letter-spacing: -0.224px; }
+  .token-hex { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--ink-48); }
+
+  .type-stack { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-lg); }
+  .type-row { padding: var(--s-sm) 0; border-bottom: 1px solid var(--divider-soft); }
+  .type-row:last-child { border-bottom: 0; }
+  .type-row .demo { margin-bottom: var(--s-xxs); color: var(--ink); }
+  .type-row .meta { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--ink-48); }
+
+  .sugg { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-lg); margin-bottom: var(--s-sm); display: flex; gap: var(--s-md); align-items: flex-start; }
+  .sugg-num {
+    background: var(--primary); color: var(--canvas);
+    width: 28px; height: 28px;
+    border-radius: var(--r-pill);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-text); font-size: 14px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .sugg-body { flex: 1; }
+  .sugg-title { font-family: var(--font-text); font-size: 17px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; margin-bottom: var(--s-xs); }
+  .sugg-why { font-family: var(--font-text); font-size: 14px; color: var(--ink-80); line-height: 1.43; letter-spacing: -0.224px; margin-bottom: var(--s-sm); }
+  .sugg-actions { display: flex; gap: var(--s-md); }
+  .sugg-action { font-family: var(--font-text); font-size: 14px; color: var(--primary); cursor: pointer; letter-spacing: -0.224px; }
+  .sugg-action.muted { color: var(--ink-48); }
+
+  .question { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-lg); margin-bottom: var(--s-sm); }
+  .question-q { font-family: var(--font-text); font-size: 17px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; margin-bottom: var(--s-xs); }
+  .question-why { font-family: var(--font-text); font-size: 14px; color: var(--ink-80); line-height: 1.43; letter-spacing: -0.224px; }
+
+  .terminal-hint {
+    position: sticky; bottom: var(--s-md);
+    background: var(--ink); color: var(--canvas);
+    border-radius: var(--r-pill);
+    padding: var(--s-sm) var(--s-lg);
+    margin-top: var(--s-lg);
+    display: flex; align-items: center; gap: var(--s-sm);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  }
+  .terminal-hint .glyph { font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; color: #69c; }
+  .terminal-hint .text { font-family: var(--font-text); font-size: 14px; letter-spacing: -0.224px; }
+  .terminal-hint .text strong { color: #69c; font-weight: 600; }
+
+  body.focus-flash { animation: flash 0.6s ease-out; }
+  @keyframes flash {
+    0% { background: var(--canvas-parchment); }
+    30% { background: rgba(0, 102, 204, 0.05); }
+    100% { background: var(--canvas-parchment); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">ClaudeDesign</span>
+  <span class="crumb">FilmMaker · v4 (Apple-design)</span>
+  <div class="right">
+    <span class="crumb" id="current-screen-pill">product: 대시보드</span>
+    <div class="pulse"><span class="pulse-dot"></span><span>SYNCED</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">DESIGN PANEL</div>
+    <h1>FilmMaker</h1>
+    <p class="lede">왼쪽 Product 탭에서 제품을 클릭하며 사용하고, 여기서 제안·로드맵·결정 내역을 확인하세요. 대화는 Claude 터미널에서.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">01</span>
+      현재 작업
+      <span class="meta">Product 탭과 자동 동기화</span>
+    </h2>
+    <div class="focus-card">
+      <div class="focus-info">
+        <div class="focus-screen" id="focus-screen">대시보드</div>
+        <div class="focus-name" id="focus-name">오늘의 작업</div>
+        <div class="focus-desc" id="focus-desc">디렉터가 매일 아침 들어와 시리즈 전체 상태를 파악하는 화면.</div>
+      </div>
+      <button class="focus-cta" id="focus-cta">Product에서 보기 ›</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">02</span>
+      최근 변경
+      <span class="meta">최신순</span>
+    </h2>
+
+    <div class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-status applied">적용됨</span>
+        <span class="proposal-file">product.html</span>
+        <span class="proposal-when">방금</span>
+      </div>
+      <div class="proposal-title">씬 워크플로우 통합 — 마스터샷·스토리보드·영상을 1페이지 스크롤로</div>
+      <div class="proposal-why">
+        "마스터샷/스토리보드/영상"이 평행 탭이 아니라 순차 phase였는데 탭처럼 다뤘던 문제 해결. 한 씬 페이지를 세로 스크롤하며 phase 1 → 2 → 3이 자연스럽게 흐름. scene-context의 탭 클릭은 해당 phase로 smooth scroll. 각 phase는 자체 dock·진척 표시(완료/진행중/대기) 보유. Phase 3 영상은 mock 타임라인으로 미래 모습 미리보기.
+      </div>
+      <div class="proposal-diff">
+        <div class="ctx">// 라우트</div>
+        <div class="rem">- 3 separate &lt;section data-screen="board|storyboard|video"&gt;</div>
+        <div class="add">+ 1 merged &lt;section data-screen="board"&gt; with #phase-master, #phase-storyboard, #phase-video</div>
+        <div class="ctx">// 마스터샷 카드 레이아웃</div>
+        <div class="rem">- position:absolute coordinates (POSITIONS table)</div>
+        <div class="add">+ CSS grid auto-fill minmax(200px, 1fr)</div>
+        <div class="ctx">// scene-context 탭</div>
+        <div class="rem">- separate routes</div>
+        <div class="add">+ anchor scroll within board page</div>
+      </div>
+    </div>
+
+    <div class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-status applied">적용됨</span>
+        <span class="proposal-file">product.html</span>
+        <span class="proposal-when">5분 전</span>
+      </div>
+      <div class="proposal-title">정보 아키텍처 분리 — 글로벌 vs 프로젝트 내부</div>
+      <div class="proposal-why">
+        Global nav (블랙)에는 <strong>FilmMaker · 프로젝트 · 설정</strong>만. 씬 보드 / 캐릭터 / 스토리보드 / 영상은 프로젝트 내부 탭으로 sub-nav (파치먼트)로 이동. sub-nav는 프로젝트 진입 시에만 표시.
+      </div>
+      <div class="proposal-diff">
+        <div class="ctx">// 글로벌 nav (블랙 44px)</div>
+        <div class="add">+ FilmMaker (브랜드)</div>
+        <div class="add">+ 프로젝트 · 설정 · 아바타</div>
+        <div class="ctx">// 프로젝트 sub-nav (파치먼트 52px, frosted)</div>
+        <div class="add">+ 비글루 시즌 2 (large display)</div>
+        <div class="add">+ 대시보드 · 씬 보드 · 캐릭터 · 스토리보드 · 영상</div>
+        <div class="add">+ "새 마스터샷" primary CTA</div>
+        <div class="rem">- 프로젝트 화면과 설정에서는 sub-nav 숨김</div>
+      </div>
+    </div>
+
+    <div class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-status applied">적용됨</span>
+        <span class="proposal-file">product.html · design.html</span>
+        <span class="proposal-when">5분 전</span>
+      </div>
+      <div class="proposal-title">DESIGN.md (Apple-design) 시스템 전체 적용</div>
+      <div class="proposal-why">
+        파치먼트 캔버스(#f5f5f7) + Action Blue 단일 강조(#0066cc) + SF Pro Display/Text + 풀 필 라운드 + 그림자는 이미지에만. Studio Neutral(다크/민트)에서 완전 전환.
+      </div>
+      <div class="proposal-diff">
+        <div class="ctx">// 색</div>
+        <div class="rem">- accent: #5cebc6 (민트)</div>
+        <div class="add">+ primary: #0066cc (Action Blue)</div>
+        <div class="ctx">// 캔버스</div>
+        <div class="rem">- bg-canvas: #0c0d0f (다크)</div>
+        <div class="add">+ canvas-parchment: #f5f5f7 (라이트)</div>
+        <div class="ctx">// 폰트</div>
+        <div class="rem">- Inter + JetBrains Mono</div>
+        <div class="add">+ SF Pro Display + SF Pro Text</div>
+        <div class="ctx">// 코너</div>
+        <div class="rem">- radius 6px on cards</div>
+        <div class="add">+ r-lg 18px on cards · r-pill on CTAs</div>
+      </div>
+    </div>
+
+    <div class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-status applied">적용됨</span>
+        <span class="proposal-file">product.html</span>
+        <span class="proposal-when">5분 전</span>
+      </div>
+      <div class="proposal-title">Cohesion pass — 내부 라벨 제거, 명명 통일</div>
+      <div class="proposal-why">
+        "Director's Bridge" → "대시보드" · scene_board → "씬 보드" · "Diff Grid" → "변주" · "Filmstrip" 라벨 제거. shot_02 → "Shot 02". ep_03 → "EP 03". 데코 이모지(🔔 🛠 🔀) 모두 제거.
+      </div>
+    </div>
+
+    <div class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-status applied">적용됨</span>
+        <span class="proposal-file">SKILL.md</span>
+        <span class="proposal-when">15분 전</span>
+      </div>
+      <div class="proposal-title">design-prototype 스킬에 Product Cohesion Pass 체크리스트 추가</div>
+      <div class="proposal-why">
+        8개 항목 의무 체크: 데이터 cross-validate, 내부 라벨 제거, 명명 통일, 아이코노그래피, 정보 밀도, 메타텍스트 금지, 상태 커버리지, 액티브 컨텍스트.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">03</span>
+      로드맵
+      <span class="meta">완료 4 · 계획 2 · 미정 1</span>
+    </h2>
+    <div style="font-family: var(--font-text); font-size: 12px; font-weight: 600; color: var(--ink-48); letter-spacing: -0.12px; text-transform: uppercase; margin-bottom: var(--s-sm);">계정 · 글로벌</div>
+    <div class="road-grid" style="margin-bottom: var(--s-lg);">
+      <div class="road-item" data-go="home">
+        <div class="road-head"><span class="road-name">프로젝트</span><span class="road-stage done">완료</span></div>
+        <div class="road-desc">프로젝트 셀렉터, 통합 검색</div>
+      </div>
+      <div class="road-item" data-go="settings">
+        <div class="road-head"><span class="road-name">설정</span><span class="road-stage blank">미정</span></div>
+        <div class="road-desc">계정·워크스페이스·빌링</div>
+      </div>
+    </div>
+
+    <div style="font-family: var(--font-text); font-size: 12px; font-weight: 600; color: var(--ink-48); letter-spacing: -0.12px; text-transform: uppercase; margin-bottom: var(--s-sm);">프로젝트 내부 · 비글루 시즌 2</div>
+    <div class="road-grid" style="margin-bottom: var(--s-lg);">
+      <div class="road-item" data-go="dashboard">
+        <div class="road-head"><span class="road-name">대시보드</span><span class="road-stage done">완료</span></div>
+        <div class="road-desc">결정 대기 · 활동 · 회차 진척</div>
+      </div>
+      <div class="road-item" data-go="episodes">
+        <div class="road-head"><span class="road-name">회차 · 씬</span><span class="road-stage done">완료</span></div>
+        <div class="road-desc">회차별 씬 그리드, 씬 진입점</div>
+      </div>
+      <div class="road-item" data-go="asset">
+        <div class="road-head"><span class="road-name">에셋</span><span class="road-stage done">완료</span></div>
+        <div class="road-desc">캐릭터 12 · 배경 8 · 소품 23 (서브탭)</div>
+      </div>
+    </div>
+
+    <div style="font-family: var(--font-text); font-size: 12px; font-weight: 600; color: var(--ink-48); letter-spacing: -0.12px; text-transform: uppercase; margin-bottom: var(--s-sm);">씬 스테이지 · Scene 12</div>
+    <div class="road-grid">
+      <div class="road-item" data-go="board">
+        <div class="road-head"><span class="road-name">마스터샷</span><span class="road-stage done">MVP 핵심</span></div>
+        <div class="road-desc">후보 생성·승인, 호버 툴바, 비교 라이트박스</div>
+      </div>
+      <div class="road-item" data-go="storyboard">
+        <div class="road-head"><span class="road-name">스토리보드</span><span class="road-stage planned">Phase 2</span></div>
+        <div class="road-desc">컷 시퀀스 (Canvas + Sequence Lane)</div>
+      </div>
+      <div class="road-item" data-go="video">
+        <div class="road-head"><span class="road-name">영상</span><span class="road-stage planned">Phase 3</span></div>
+        <div class="road-desc">15초 클립 + 가편 타임라인</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">04</span>
+      디자인 토큰
+      <span class="meta">Apple-design / DESIGN.md</span>
+    </h2>
+
+    <div class="tokens-grid">
+      <div class="token-card"><div class="token-swatch" style="background: #0066cc;"></div><div><div class="token-name">primary</div><div class="token-hex">#0066cc</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #1d1d1f;"></div><div><div class="token-name">ink</div><div class="token-hex">#1d1d1f</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #ffffff; border: 1px solid var(--hairline);"></div><div><div class="token-name">canvas</div><div class="token-hex">#ffffff</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #f5f5f7; border: 1px solid var(--hairline);"></div><div><div class="token-name">parchment</div><div class="token-hex">#f5f5f7</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #272729;"></div><div><div class="token-name">tile-dark</div><div class="token-hex">#272729</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #e0e0e0;"></div><div><div class="token-name">hairline</div><div class="token-hex">#e0e0e0</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #7a7a7a;"></div><div><div class="token-name">ink-48</div><div class="token-hex">#7a7a7a</div></div></div>
+      <div class="token-card"><div class="token-swatch" style="background: #2997ff;"></div><div><div class="token-name">link-on-dark</div><div class="token-hex">#2997ff</div></div></div>
+    </div>
+
+    <div class="type-stack">
+      <div class="type-row">
+        <div class="demo" style="font-family: var(--font-display); font-size: 40px; font-weight: 600; line-height: 1.1;">Scene 12 — 병실 충돌</div>
+        <div class="meta">SF Pro Display · display-lg · 40 / 600 / 1.1</div>
+      </div>
+      <div class="type-row">
+        <div class="demo" style="font-family: var(--font-display); font-size: 21px; font-weight: 600; letter-spacing: 0.231px;">마스터샷 후보 11 / 24</div>
+        <div class="meta">SF Pro Display · tagline · 21 / 600 / 1.19</div>
+      </div>
+      <div class="type-row">
+        <div class="demo" style="font-size: 17px; line-height: 1.47; letter-spacing: -0.374px;">@엘레나의 클로즈업, 차가운 색감으로 표정을 압박한다.</div>
+        <div class="meta">SF Pro Text · body · 17 / 400 / 1.47 / -0.374px</div>
+      </div>
+      <div class="type-row">
+        <div class="demo" style="font-size: 14px; color: var(--ink-48); letter-spacing: -0.224px;">2분 전 · 김디렉터</div>
+        <div class="meta">SF Pro Text · caption · 14 / 400 / 1.43 / -0.224px</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">05</span>
+      다음 제안
+      <span class="meta">우선순위순</span>
+    </h2>
+
+    <div class="sugg">
+      <div class="sugg-num">1</div>
+      <div class="sugg-body">
+        <div class="sugg-title">씬 보드 dogfooding — DESIGN.md 적용 후 검증</div>
+        <div class="sugg-why">
+          민트 → Action Blue 전환 후 가장 검증이 필요한 곳. 마스터샷 ★ 표시, 호버 툴바, 코멘트, 라이트박스가 Apple 톤에서 어떻게 느껴지는지 확인.
+        </div>
+        <div class="sugg-actions">
+          <span class="sugg-action" data-go="board">씬 보드 열기 ›</span>
+          <span class="sugg-action muted">건너뛰기</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sugg">
+      <div class="sugg-num">2</div>
+      <div class="sugg-body">
+        <div class="sugg-title">스토리보드 화면 빌드</div>
+        <div class="sugg-why">
+          이미 결정된 레이아웃(Canvas + Sequence Lane)을 Apple 톤으로 실제 화면으로. Phase 2 첫 빌드 후보.
+        </div>
+        <div class="sugg-actions">
+          <span class="sugg-action">다음에 빌드</span>
+          <span class="sugg-action muted">나중에</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sugg">
+      <div class="sugg-num">3</div>
+      <div class="sugg-body">
+        <div class="sugg-title">로그인 / 온보딩 흐름</div>
+        <div class="sugg-why">
+          현재 프로젝트 화면이 진입점이지만 첫 사용자 경험이 비어 있음. SSO + 워크스페이스 선택 + 첫 프로젝트 생성 흐름.
+        </div>
+        <div class="sugg-actions">
+          <span class="sugg-action">대화로 논의</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">
+      <span class="num">06</span>
+      미해결 질문
+    </h2>
+
+    <div class="question">
+      <div class="question-q">디렉터 부재 시 작업 정체 — 권한 위임 모델</div>
+      <div class="question-why">크리에이터 5명이 디렉터 결정 대기로 막힐 경우 어떻게 풀까. 시니어 크리에이터 임시 승인? 자동 승인 임계치?</div>
+    </div>
+
+    <div class="question">
+      <div class="question-q">캐릭터 변주 깊이 — 상속이 깊어지면</div>
+      <div class="question-why">"비 맞은 후" → "옷 찢어진" 같은 상속이 5단계 이상이면 현재 그리드로 부족. 그래프 뷰가 필요할 수 있음.</div>
+    </div>
+
+    <div class="question">
+      <div class="question-q">캐릭터 일관성 — IP-Adapter와 시드만으로 14씬 가능?</div>
+      <div class="question-why">Phase 2에서 LoRA 학습이 옵션으로 필요할 수도. 비글루 팀의 실사용 결과를 기다림.</div>
+    </div>
+  </div>
+
+  <div class="terminal-hint">
+    <span class="glyph">›</span>
+    <span class="text">대화는 <strong>Claude 터미널</strong>에서. "스토리보드 빌드하자" 또는 "Action Blue 더 진하게" 같이 자유롭게 알려주세요.</span>
+  </div>
+
+</div>
+
+<script>
+const channel = new BroadcastChannel('filmmaker');
+channel.addEventListener('message', e => {
+  const m = e.data;
+  if (m.type === 'screen-changed') {
+    updateFocus(m.screen);
+    document.body.classList.remove('focus-flash');
+    void document.body.offsetWidth;
+    document.body.classList.add('focus-flash');
+  }
+  if (m.type === 'focus-proposal') {
+    document.querySelector('.section:nth-of-type(5)').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
+
+const SCREEN_INFO = {
+  home: { name: '프로젝트', screen: '프로젝트', desc: '디렉터의 시작 화면. 프로젝트 그리드와 빠른 액션.' },
+  dashboard: { name: '오늘의 작업', screen: '대시보드', desc: '디렉터가 매일 아침 들어와 시리즈 전체 상태를 파악하는 화면.' },
+  episodes: { name: '회차 · 씬', screen: '회차 · 씬', desc: '회차별 씬 그리드. 각 씬으로 진입하는 허브.' },
+  board: { name: 'Scene 12 · 마스터샷', screen: '마스터샷', desc: '씬 스테이지 첫 단계. 후보 생성·승인의 메인 캔버스.' },
+  asset: { name: '에셋', screen: '에셋', desc: '캐릭터 12 · 배경 8 · 소품 23. 서브탭으로 분류.' },
+  storyboard: { name: 'Scene 12 · 스토리보드', screen: '스토리보드', desc: '씬 스테이지 두번째. 마스터샷 → 컷 시퀀스로 분할.' },
+  video: { name: 'Scene 12 · 영상', screen: '영상', desc: '씬 스테이지 마지막. 15초 클립 + 가편.' },
+  settings: { name: '설정', screen: '설정', desc: '계정·워크스페이스·빌링. 아직 디자인되지 않음.' }
+};
+
+function updateFocus(screen) {
+  const info = SCREEN_INFO[screen] || SCREEN_INFO.dashboard;
+  document.getElementById('focus-screen').textContent = info.screen;
+  document.getElementById('focus-name').textContent = info.name;
+  document.getElementById('focus-desc').textContent = info.desc;
+  document.getElementById('current-screen-pill').textContent = 'product: ' + info.screen;
+}
+
+document.querySelectorAll('[data-go]').forEach(el => {
+  el.addEventListener('click', () => {
+    channel.postMessage({ type: 'navigate', screen: el.dataset.go });
+  });
+});
+
+document.getElementById('focus-cta').addEventListener('click', () => {
+  const screen = (document.getElementById('current-screen-pill').textContent || '').split(': ')[1];
+  const reverseMap = Object.entries(SCREEN_INFO).find(([k, v]) => v.screen === screen);
+  if (reverseMap) channel.postMessage({ type: 'navigate', screen: reverseMap[0] });
+});
+</script>
+</body>
+</html>

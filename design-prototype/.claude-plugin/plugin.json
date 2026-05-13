@@ -1,0 +1,20 @@
+{
+  "name": "design-prototype",
+  "version": "0.1.0",
+  "description": "Build working clickable product prototypes for co-design. Two-tab pattern: product.html (real interactions — hover, click, type, drag) + design.html (ClaudeDesign panel for proposals and roadmap). Conversation happens in the Claude terminal; the prototype reloads as you talk. Use when the user wants to dogfood a product and shape it through chat, not pick between A/B/C cards or get a static mockup.",
+  "author": {
+    "name": "saroby"
+  },
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "prototype",
+    "ux",
+    "ui",
+    "dogfooding",
+    "co-design",
+    "clickable",
+    "interactive",
+    "visual-companion"
+  ]
+}
