@@ -64,6 +64,14 @@
       }
     },
     {
+      "name": "cc-plugin-codex",
+      "description": "An open-source plugin that runs inside Codex and lets you use Claude Code and Claude models for review, rescue, and tracked background workflows.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/sendbird/cc-plugin-codex.git"
+      }
+    },
+    {
       "name": "medium-to-tistory",
       "description": "Download a Medium article for topic inspiration, write a substantially original Korean post with a fresh hero image generated via codex-util:imagegen, and publish privately to Tistory in HTML mode. Glue between medium-cli and tistory-cli with IP-safe guardrails (no translation, no source images).",
       "source": {
