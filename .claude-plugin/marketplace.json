@@ -51,8 +51,8 @@
       "name": "axiom",
       "description": "Battle-tested Claude Code agents, skills, and references for modern xOS (iOS, iPadOS, macOS, watchOS, tvOS) development",
       "source": {
-        "source": "github",
-        "repo": "CharlesWiltgen/Axiom",
+        "source": "git",
+        "url": "https://github.com/CharlesWiltgen/Axiom.git",
         "path": ".claude-plugin/plugins/axiom"
       }
     },
