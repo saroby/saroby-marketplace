@@ -81,6 +81,14 @@
       }
     },
     {
+      "name": "balsamiq-mockups-mcp",
+      "description": "MCP server that lets Claude create and edit Balsamiq Wireframes (.bmpr) files programmatically — describe a screen in chat, get a real .bmpr you can open in Balsamiq.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/BalsamiqMockupsMCP.git"
+      }
+    },
+    {
       "name": "design-prototype",
       "description": "Build working clickable product prototypes for co-design. Two-tab pattern: product.html (real interactions — hover, click, type, drag) + design.html (ClaudeDesign panel for proposals and roadmap). Conversation happens in the Claude terminal; the prototype reloads as you talk. NOT a static mockup, NOT A/B choice cards.",
       "source": {

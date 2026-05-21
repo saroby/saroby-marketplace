@@ -23,3 +23,4 @@ Then install individual plugins:
 | `andrej-karpathy-skills` | Behavioral guidelines to reduce common LLM coding mistakes | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) |
 | `cc-plugin-codex` | Run Claude Code and Claude models inside Codex for review, rescue, and tracked background workflows | [sendbird/cc-plugin-codex](https://github.com/sendbird/cc-plugin-codex) |
 | `design-prototype` | Build working clickable product prototypes for co-design — `product.html` (real interactions) + `design.html` (ClaudeDesign panel), iterate via the Claude terminal | local |
+| `balsamiq-mockups-mcp` | MCP server that lets Claude create and edit Balsamiq Wireframes (.bmpr) files programmatically | [saroby/BalsamiqMockupsMCP](https://github.com/saroby/BalsamiqMockupsMCP) |
