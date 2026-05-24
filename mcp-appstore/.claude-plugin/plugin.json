@@ -1,0 +1,19 @@
+{
+  "name": "mcp-appstore",
+  "version": "0.1.0",
+  "description": "MCP server that scrapes Google Play and Apple App Store for ASO research — search apps, fetch details/reviews/keywords/similar apps without any auth. Wraps appreply-co/mcp-appstore with a one-shot setup that clones + installs on first launch.",
+  "author": {
+    "name": "saroby"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "app-store",
+    "google-play",
+    "aso",
+    "scraper",
+    "reviews",
+    "keywords",
+    "competitor-research"
+  ]
+}

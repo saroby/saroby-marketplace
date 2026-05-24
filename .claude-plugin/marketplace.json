@@ -95,6 +95,22 @@
         "source": "url",
         "url": "https://github.com/saroby/saroby-marketplace/design-prototype"
       }
+    },
+    {
+      "name": "mcp-appstore",
+      "description": "MCP server that scrapes Google Play and Apple App Store for ASO research — search apps, fetch details/reviews/keywords/similar apps without any auth. Wraps appreply-co/mcp-appstore with a one-shot setup that clones + installs on first launch.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/saroby-marketplace/mcp-appstore"
+      }
+    },
+    {
+      "name": "app-store-connect-cli-skills",
+      "description": "Agent Skills for the asc CLI (App Store Connect API) — automate TestFlight, builds, submissions, metadata sync, screenshots, signing, IAP/subscriptions, crash triage, and release flow for your own apps. Requires the asc binary (brew install asc).",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/rorkai/app-store-connect-cli-skills.git"
+      }
     }
   ]
 }

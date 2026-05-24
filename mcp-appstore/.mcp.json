@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mcp-appstore": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "DIR=\"${MCP_APPSTORE_DIR:-$HOME/.cache/claude-mcp-appstore}\"; if [ ! -f \"$DIR/server.js\" ]; then mkdir -p \"$(dirname \"$DIR\")\" >&2 && git clone --depth=1 https://github.com/appreply-co/mcp-appstore.git \"$DIR\" >&2 && (cd \"$DIR\" && npm install --omit=dev --silent >&2); fi; exec node \"$DIR/server.js\""
+      ]
+    }
+  }
+}
