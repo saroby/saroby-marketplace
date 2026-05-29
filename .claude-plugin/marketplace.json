@@ -111,6 +111,14 @@
         "source": "url",
         "url": "https://github.com/rorkai/app-store-connect-cli-skills.git"
       }
+    },
+    {
+      "name": "qa-tc",
+      "description": "Generate grounded, multi-platform QA test cases from Confluence/Figma/docs/URLs combined with code and on-device grounding. The spec is the source of truth — every test case must cite a SPEC quote (no hallucinated cases); code and mobile-mcp captures are the baseline, so cases come out labeled per platform as NEW / REGRESSION / MISMATCH / INFERRED. Pure Claude Code skill (in-session LLM + MCP, no daemon, zero runtime deps) that outputs a self-contained Rich HTML dashboard + CSV, with cross-group dedupe and a regression-collection model with [OBSOLETE] sweep.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/saroby/claude-qa.git"
+      }
     }
   ]
 }
