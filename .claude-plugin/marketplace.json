@@ -119,6 +119,14 @@
         "source": "url",
         "url": "https://github.com/saroby/claude-qa.git"
       }
+    },
+    {
+      "name": "humanize-korean",
+      "description": "AI가 쓴 한글 텍스트를 사람이 쓴 글처럼 윤문 — Fast(monolith) + strict 5인 파이프라인. 10대 카테고리 40+ AI 티 패턴 탐지·재작성.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/epoko77-ai/im-not-ai.git"
+      }
     }
   ]
 }

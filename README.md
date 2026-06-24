@@ -26,3 +26,4 @@ Then install individual plugins:
 | `balsamiq-mockups-mcp` | MCP server that lets Claude create and edit Balsamiq Wireframes (.bmpr) files programmatically | [saroby/BalsamiqMockupsMCP](https://github.com/saroby/BalsamiqMockupsMCP) |
 | `mcp-appstore` | MCP server for Google Play / Apple App Store scraping — ASO research (search, reviews, keywords, similar apps), auto-installs on first launch | [appreply-co/mcp-appstore](https://github.com/appreply-co/mcp-appstore) (wrapper: local) |
 | `app-store-connect-cli-skills` | Agent Skills for the `asc` CLI — TestFlight, builds, submissions, metadata sync, screenshots, signing, IAP/subscriptions automation for your own apps | [rorkai/app-store-connect-cli-skills](https://github.com/rorkai/app-store-connect-cli-skills) |
+| `humanize-korean` | AI가 쓴 한글 텍스트를 사람이 쓴 글처럼 윤문 — Fast(monolith) + strict 5인 파이프라인, 10대 카테고리 40+ AI 티 패턴 탐지·재작성 | [epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai) |
