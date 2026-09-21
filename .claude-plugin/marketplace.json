@@ -74,7 +74,7 @@
     },
     {
       "name": "medium-to-tistory",
-      "description": "Download a Medium article for topic inspiration, write a substantially original Korean post with a fresh hero image generated via codex-util:imagegen, and publish privately to Tistory in HTML mode. Glue between medium-cli and tistory-cli with IP-safe guardrails (no translation, no source images).",
+      "description": "Download a Medium article for topic inspiration, write a substantially original Korean post that reads as human-written (AI-tell lint + Tistory editor markup converter), and publish privately to Tistory in HTML mode. Glue between medium-cli and tistory-cli with IP-safe guardrails (no translation, no source images).",
       "source": {
         "source": "url",
         "url": "https://github.com/saroby/saroby-marketplace/medium-to-tistory"
